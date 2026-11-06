@@ -99,7 +99,7 @@ nav .ic{font-size:1.25rem;line-height:1}
 <div id="app" class="hide">
   <header class="hero">
     <div class="hero-top">
-      <div><small id="greet">Welcome</small><h1 id="title">🦋 JCM Butterfly Breeding Farm </h1></div>
+      <div><small id="greet">Welcome</small><h1 id="title">🦋 Butterfly Breeding Farm</h1></div>
       <button class="cartbtn" onclick="toggleCart(true)">🛒 <span id="cartCount">0</span></button>
     </div>
     <div class="live" id="live"><span class="dot"></span><span id="liveTxt">Connecting…</span></div>
@@ -206,7 +206,7 @@ nav .ic{font-size:1.25rem;line-height:1}
 <div id="toast" class="hide"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYIGTtmpnVzpbwDMHAqkXkE5v5i0bxhFDEF7VypTsa_epQXAkb78CVPyIhO4zva5RK/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVeUcccJsteDDRO6ldesnaXCMsPt_qAiRtCeInEL2pufS9Tm9RpwM6ZInRX_i9UMWukA/exec';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
 
 // ===== DATA =====
@@ -236,10 +236,11 @@ const FARMS = {
   'Saluciana Integrated and Butterfly Farm':{loc:'Sta. Cruz, Marinduque',ll:[13.43847474827148,122.0971865954574],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 915 123 4269',sp:STD},
   'Butterfly Paradise Farm':{loc:'Baguio City',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 917 123 4567',sp:STD},
   'Rainbow Wings Sanctuary':{loc:'Tagaytay',ll:[14.1059,120.9627],p:120,c:15,h:'9:00 AM - 4:00 PM',tel:'+63 918 234 5678',sp:['Conservation education','Native species','Research tours']},
-  'Monarch Breeding Center':{loc:'Los Baños, Laguna',ll:[14.1693,121.2376],p:200,c:12,h:'10:00 AM - 3:00 PM (By appointment)',tel:'+63 919 345 6789',sp:['Research tours','Breeding techniques','Student programs']}
+  'Monarch Breeding Center':{loc:'Los Baños, Laguna',ll:[14.1693,121.2376],p:200,c:12,h:'10:00 AM - 3:00 PM (By appointment)',tel:'+63 919 345 6789',sp:['Research tours','Breeding techniques','Student programs']},
+  'Australian Butterfly Farm': {loc:'Location here',ll:[0,0],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+61 000 000 000',sp:STD},
 };
 const SLOTS = ['09:00 AM - 11:00 AM','11:00 AM - 01:00 PM','01:00 PM - 03:00 PM','03:00 PM - 05:00 PM'];
-const ID_TYPES = ['Passport',"Driver's license",'PhilSys ID','UMID','Postal ID'];
+const ID_TYPES = ['Passport',"Driver's license",'PhilSys ID','UMID','Postal ID', 'SSS', 'Employee ID','Student ID'];
 const ROLE_LIST = ['purchaser','buyer','breeder','enthusiast','farmowner','admin'];
 const ROLE_NAME = {purchaser:'Purchaser',buyer:'Buyer',breeder:'Breeder',enthusiast:'Enthusiast / Visitor',farmowner:'Farm owner',admin:'Administrator'};
 const LIVE = ['Awaiting Approval','Pending Payment','Payment Submitted','Confirmed'];
