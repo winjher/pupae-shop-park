@@ -1355,6 +1355,9 @@ function boot() {
 }
 
 boot();
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !IN_APPS_SCRIPT) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>
