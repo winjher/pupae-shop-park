@@ -99,7 +99,7 @@ nav .ic{font-size:1.25rem;line-height:1}
 <div id="app" class="hide">
   <header class="hero">
     <div class="hero-top">
-      <div><small id="greet">Welcome</small><h1 id="title">🦋 Butterfly Breeding Farm</h1></div>
+      <div><small id="greet">Welcome</small><h1 id="title">🦋 Butterfly Shop</h1></div>
       <button class="cartbtn" onclick="toggleCart(true)">🛒 <span id="cartCount">0</span></button>
     </div>
     <div class="live" id="live"><span class="dot"></span><span id="liveTxt">Connecting…</span></div>
@@ -114,7 +114,7 @@ nav .ic{font-size:1.25rem;line-height:1}
         <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
       </div>
       <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
-      <div class="card"><h3>🕘 Recent Activity</h3><div id="recent"></div></div>
+      <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
     </section>
 
     <!-- MARKET -->
@@ -131,10 +131,10 @@ nav .ic{font-size:1.25rem;line-height:1}
       </div>
     </section>
 
-    <!-- PUPAE -->
+    <!-- PUPAE (breeders and buyers) -->
     <section id="vPupae" class="hide"></section>
 
-    <!-- VISITS -->
+    <!-- VISITS (visitors) -->
     <section id="vVisits" class="hide">
       <div class="card">
         <h3>🎫 Request a Farm Visit</h3>
@@ -161,6 +161,9 @@ nav .ic{font-size:1.25rem;line-height:1}
       </div>
     </section>
 
+    <!-- FARM OWNER: Orders and seat panel (own farm only) -->
+    <section id="vFarm" class="hide"></section>
+
     <!-- MORE -->
     <section id="vMore" class="hide"></section>
   </main>
@@ -170,7 +173,7 @@ nav .ic{font-size:1.25rem;line-height:1}
   <button id="nHome" class="on" onclick="showView('home')"><span class="ic">🏠</span>Home</button>
   <button id="nMarket" onclick="showView('market')"><span class="ic">🛍</span>Market</button>
   <button id="nPupae" class="hide" onclick="showView('pupae')"><span class="ic">🐛</span>Pupae</button>
-  <button id="nVisits" class="hide" onclick="showView('visits')"><span class="ic">🎫</span>Visits</button>
+  <button id="nVisits" class="hide" onclick="showView('visits')"><span class="ic" id="nVisitsIc">🎫</span><span id="nVisitsLabel">Visits</span></button>
   <button id="nMore" onclick="showView('more')"><span class="ic">☰</span>More</button>
 </nav>
 
@@ -228,23 +231,32 @@ const QA = [
   'Not yet matured (freshly pupated, within 2 days)'
 ];
 const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
+// Must match FARM_DEFAULTS in Code.gs exactly (same names)
 const FARMS = {
   'JCM Butterfly Breeding Farm':{loc:'Cawit, Boac, Marinduque',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
+  'JMC Butterfly Farm':{loc:'Marinduque',ll:[13.4,121.9],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
+  'La Anton Insects & Butterfly Farm':{loc:'Cawit, Boac, Marinduque',ll:[13.3837773,121.8396811],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
   "Lorica's Butterfly Breeding Farm":{loc:'Bunganay, Boac, Marinduque',ll:[13.391627752131035,121.83732779599431],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 927 923 4527',sp:STD},
   'Lyra-Ysabelle Butterfly':{loc:'Cawit, Boac, Marinduque',ll:[13.380662651692896,121.82747508250148],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'(042) 754 5380',sp:STD},
   'Marl Insects Farm':{loc:'Caganhao, Boac, Marinduque',ll:[13.402601213675057,121.82643398620317],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 918 128 4360',sp:STD},
   'Saluciana Integrated and Butterfly Farm':{loc:'Sta. Cruz, Marinduque',ll:[13.43847474827148,122.0971865954574],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 915 123 4269',sp:STD},
   'Butterfly Paradise Farm':{loc:'Baguio City',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 917 123 4567',sp:STD},
   'Rainbow Wings Sanctuary':{loc:'Tagaytay',ll:[14.1059,120.9627],p:120,c:15,h:'9:00 AM - 4:00 PM',tel:'+63 918 234 5678',sp:['Conservation education','Native species','Research tours']},
-  'Monarch Breeding Center':{loc:'Los Baños, Laguna',ll:[14.1693,121.2376],p:200,c:12,h:'10:00 AM - 3:00 PM (By appointment)',tel:'+63 919 345 6789',sp:['Research tours','Breeding techniques','Student programs']},
-  'Australian Butterfly Farm': {loc:'Location here',ll:[0,0],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+61 000 000 000',sp:STD},
+  'Monarch Breeding Center':{loc:'Los Baños, Laguna',ll:[14.1693,121.2376],p:200,c:12,h:'10:00 AM - 3:00 PM (By appointment)',tel:'+63 919 345 6789',sp:['Research tours','Breeding techniques','Student programs']}
 };
 const SLOTS = ['09:00 AM - 11:00 AM','11:00 AM - 01:00 PM','01:00 PM - 03:00 PM','03:00 PM - 05:00 PM'];
-const ID_TYPES = ['Passport',"Driver's license",'PhilSys ID','UMID','Postal ID', 'SSS', 'Employee ID','Student ID'];
+const ID_TYPES = ['Passport',"Driver's license",'PhilSys ID','UMID','Postal ID','SSS','Employee ID','Student ID'];
 const ROLE_LIST = ['purchaser','buyer','breeder','enthusiast','farmowner','admin'];
 const ROLE_NAME = {purchaser:'Purchaser',buyer:'Buyer',breeder:'Breeder',enthusiast:'Enthusiast / Visitor',farmowner:'Farm owner',admin:'Administrator'};
 const LIVE = ['Awaiting Approval','Pending Payment','Payment Submitted','Confirmed'];
 const SOON = 12 * 36e5;
+const CLS_TASKS = [
+  {v:'species', t:'Species identification'},
+  {v:'stage', t:'Lifecycle stage'},
+  {v:'disease', t:'Larval disease'},
+  {v:'instar', t:'Larvae instar'},
+  {v:'defect', t:'Pupae defect'}
+];
 const CHIP = {
   'Awaiting Approval':'info','Full':'bad','Pending Payment':'warn','Payment Submitted':'info',
   'Confirmed':'ok','Rejected':'bad','Cancelled':'bad','Awaiting Payment':'warn',
@@ -252,9 +264,9 @@ const CHIP = {
 };
 
 // ===== STATE =====
-let S = {catalog:{},sales:{},park:{gName:'',gNo:'',closed:[],farms:{}},reservations:[],lots:[],orders:[],users:{},media:{}};
+let S = {catalog:{},sales:{},park:{gName:'',gNo:'',closed:[],farms:{}},capRules:{},booked:{},reservations:[],lots:[],orders:[],users:{},media:{}};
 let me = null, cart = {}, manage = false, selSlot = '', viewCat = '', busy = 0, saveT = 0, polling = false, sig = '',
-    chart = null, threadRef = null, adminUsers = [], editing = '';
+    chart = null, threadRef = null, adminUsers = [], editing = '', dashboardToken = '';
 
 // ===== HELPERS =====
 const $ = id => document.getElementById(id);
@@ -271,23 +283,27 @@ const isAdmin = () => roleOf() === 'admin';
 const isBreeder = () => roleOf() === 'breeder';
 const isOwner = () => roleOf() === 'farmowner';
 const isBuyer = () => ['buyer','purchaser'].indexOf(roleOf()) > -1;
-const canFarm = () => isOwner() || isAdmin();
 const canShopManage = () => isBreeder() || isAdmin();
 const posts = () => isBreeder();
+const myFarm = () => myUser().farm || '';
 const liveRes = r => LIVE.indexOf(r.status) > -1;
 const itemOf = (b, s) => Object.assign({price: 50, flooded: false}, ((S.catalog || {})[b] || {})[s]);
 const floodedFor = (b, s) => !!itemOf(b, s).flooded;
 const myCat = () => (me && (S.catalog || {})[me]) || {};
 const liveLot = l => l.left > 0 && Date.now() < l.exp && !floodedFor(l.breeder, l.sp);
 const pic = (s, k) => S.media[s + '|' + k] || '';
-const fp = n => (S.park.farms[n] && S.park.farms[n].p != null) ? S.park.farms[n].p : FARMS[n].p;
-const fc = n => (S.park.farms[n] && S.park.farms[n].c != null) ? S.park.farms[n].c : FARMS[n].c;
+const fp = n => (S.park.farms && S.park.farms[n] && S.park.farms[n].p != null) ? S.park.farms[n].p : FARMS[n].p;
+const fc = n => (S.park.farms && S.park.farms[n] && S.park.farms[n].c != null) ? S.park.farms[n].c : FARMS[n].c;
+// Seats per slot on a given date, using the farm's seat rules (cap 0 = closed)
+const capOn = (f, d) => { let c = fc(f); ((S.capRules || {})[f] || []).forEach(r => { if (d >= r.from && d <= r.to) c = r.cap; }); return c; };
+// Booked seats for farm|date|slot (counts only, from the server)
+const booked = (f, d, s) => (S.booked || {})[f + '|' + d + '|' + s] || 0;
 const farm = () => $('rFarm').value;
 const nVis = () => Math.max(0, parseInt($('rN').value, 10) || 0);
-const booked = (f, d, s) => S.reservations.filter(r => liveRes(r) && r.farm === f && r.date === d && r.slot === s).reduce((a, r) => a + r.n, 0);
 const chip = st => `<span class="chip ${CHIP[st] || ''}">${esc(st)}</span>`;
 const emptyBox = (icon, text) => `<div class="empty"><div>${icon}</div>${text}</div>`;
 const fmtDate = s => { const d = new Date(s); return isNaN(d) ? String(s || '') : d.toLocaleString('en-PH', {dateStyle:'medium', timeStyle:'short'}); };
+const money = n => '₱' + Number(n || 0).toFixed(2);
 const timeLeft = l => {
   const m = l.exp - Date.now();
   if (m <= 0) return 'expired';
@@ -329,11 +345,14 @@ function rpc(fn, ...args) {
 function log(action, detail) { if (me) rpc('logActivity', me, roleOf() || '-', action, String(detail || '')).catch(() => {}); }
 
 // ===== DATA SYNC (real-time polling) =====
+// The server sends each user only their own orders and bookings, plus public market data.
 function applyState(x) {
   if (!x) return;
   S.catalog = x.catalog || {};
   S.sales = x.sales || {};
   S.park = Object.assign({gName:'',gNo:'',closed:[],farms:{}}, x.park || {});
+  S.capRules = x.capRules || {};
+  S.booked = x.booked || {};
   S.reservations = x.reservations || [];
   S.lots = x.lots || [];
   S.orders = x.orders || [];
@@ -348,11 +367,11 @@ function loadAll(cb) {
     st => { applyState(st); setLive(true); },
     e => { setLive(false); toast('Cannot reach server: ' + errText(e)); }
   ).then(() => {
-    if (me && !S.users[me]) { me = null; try { sessionStorage.removeItem('bpUser'); } catch (e) {} }
+    if (me && !S.users[me]) { me = null; clearSession(); }
     if (cb) cb();
   });
 }
-// Only park settings (farm prices, capacity, closed dates, GCash) are saved from the client
+// Only park settings (farm prices, default seats, closed dates, GCash) are saved from the client
 function save() {
   if (!me) return;
   clearTimeout(saveT);
@@ -365,8 +384,8 @@ function save() {
 function poll() {
   if (busy || saveT) return;
   loadAll(() => {
-    const s = JSON.stringify([S.catalog, S.lots.map(l => [l.id, l.left, l.price]), S.orders.map(o => [o.id, o.status]),
-      S.reservations.map(r => [r.ref, r.status]), me ? S.users[me] : null]);
+    const s = JSON.stringify([S.catalog, S.capRules, S.booked, S.lots.map(l => [l.id, l.left, l.price]),
+      S.orders.map(o => [o.id, o.status]), S.reservations.map(r => [r.ref, r.status]), me ? S.users[me] : null]);
     if (s !== sig) { sig = s; renderAll(); }
     if (me) { checkPopup(); if (threadRef) loadThread(); }
   });
@@ -377,6 +396,7 @@ function renderAll() {
   if ($('lotList')) renderLots();
   if ($('orderList')) renderOrders();
   if (!$('vVisits').classList.contains('hide')) renderSlots();
+  if (!$('vFarm').classList.contains('hide')) fillFarm();
   renderRes(); renderOwnerPanel();
 }
 
@@ -387,8 +407,13 @@ function renderHeader() {
   $('title').textContent = u.role === 'breeder' ? '🦋 Breeding Farm' : u.role === 'farmowner' ? '🦋 Farm Owner' : '🦋 Butterfly Shop';
 }
 function applyNav() {
-  $('nPupae').classList.toggle('hide', !me || roleOf() === 'enthusiast' || roleOf() === 'farmowner' || roleOf() === 'admin');
+  const owner = isOwner();
+  $('nPupae').classList.toggle('hide', !me || ['enthusiast', 'farmowner', 'admin'].indexOf(roleOf()) > -1);
   $('nVisits').classList.toggle('hide', !me);
+  // Farm owners see "Orders" in place of "Visits"
+  $('nVisitsIc').textContent = owner ? '📋' : '🎫';
+  $('nVisitsLabel').textContent = owner ? 'Orders' : 'Visits';
+  $('nVisits').classList.toggle('on', false);
 }
 
 // ===== AUTH =====
@@ -428,7 +453,7 @@ function showAuth(m) {
 }
 function roleChanged() {
   const r = $('lRole').value;
-  $('lOrgL').textContent = r === 'breeder' ? 'Farm / breeding business name' : (r === 'buyer' || r === 'purchaser') ? 'Company / buyer name (optional)' : 'Organization / school (optional)';
+  $('lOrgL').textContent = r === 'breeder' ? 'Farm / breeding business name' : (r === 'buyer') ? 'Company / buyer name (optional)' : 'Organization / school (optional)';
   $('idBox').classList.toggle('hide', r !== 'buyer');
 }
 function doLogin() {
@@ -450,10 +475,19 @@ function auth(mode, role_, u, pw, x, m) {
   rpc('login', role_, u, pw, x).then(res => {
     if (!res.ok) { m.textContent = res.msg; return; }
     m.textContent = '';
-    try { sessionStorage.setItem('bpUser', u); } catch (e) {}
+    dashboardToken = res.dashboardToken || '';
+    try {
+      sessionStorage.setItem('bpUser', u);
+      if (dashboardToken) sessionStorage.setItem('bpDashboardToken', dashboardToken);
+      else sessionStorage.removeItem('bpDashboardToken');
+    } catch (e) {}
     me = u;
     loadAll(() => { enter(); toast('Welcome!'); });
   }).catch(e => { m.textContent = 'Server error: ' + errText(e); });
+}
+function clearSession() {
+  try { sessionStorage.removeItem('bpUser'); sessionStorage.removeItem('bpDashboardToken'); } catch (e) {}
+  dashboardToken = '';
 }
 function enter() {
   initVisits();
@@ -464,29 +498,37 @@ function enter() {
 }
 function logout() {
   log('Logout', '');
-  try { sessionStorage.removeItem('bpUser'); } catch (e) {}
+  clearSession();
   me = null; cart = {}; manage = false; adminUsers = []; editing = '';
   renderHeader(); applyNav();
+  $('vFarm').innerHTML = '';
   showView('more');
   toast('Logged out');
 }
 
-/* ===== PART 1 ENDS HERE. Part 2 continues with the Navigation and Home sections. ===== */
-
 // ===== NAVIGATION =====
 function showView(v) {
-  if ((v === 'visits' || v === 'pupae') && !me) { toast('Please log in first (More tab).'); v = 'more'; }
-  ['home','market','pupae','visits','more'].forEach(x => {
+  if (['visits', 'pupae', 'farm'].indexOf(v) > -1 && !me) { toast('Please log in first (More tab).'); v = 'more'; }
+  // A farm owner's Orders button opens the farm panel
+  if (v === 'visits' && isOwner()) v = 'farm';
+  if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
+  if (v === 'visits' && isOwner()) v = 'farm';
+  ['home', 'market', 'pupae', 'visits', 'farm', 'more'].forEach(x => {
     $('v' + cap(x)).classList.toggle('hide', x !== v);
-    $('n' + cap(x)).classList.toggle('on', x === v);
   });
+  $('nHome').classList.toggle('on', v === 'home');
+  $('nMarket').classList.toggle('on', v === 'market');
+  $('nPupae').classList.toggle('on', v === 'pupae');
+  $('nVisits').classList.toggle('on', v === 'visits' || v === 'farm');
+  $('nMore').classList.toggle('on', v === 'more');
   if (v === 'pupae') renderPupaeShell();
   if (v === 'more') renderMore();
+  if (v === 'farm') renderFarm();
   renderAll();
   window.scrollTo(0, 0);
 }
 
-// ===== HOME =====
+// ===== HOME & MY DASHBOARD =====
 function renderHome() {
   const now = Date.now(), u = myUser();
   const myOrders = S.orders.filter(o => me && (o.buyer === me || o.breeder === me)).sort((a, b) => b.created - a.created);
@@ -496,9 +538,9 @@ function renderHome() {
   $('stVisits').textContent = myBookings.length;
 
   let al = '';
-  if (canFarm()) {
+  if (isOwner() || isAdmin()) {
     const waiting = S.reservations.filter(r => r.status === 'Awaiting Approval' && (isAdmin() || r.farm === u.farm)).length;
-    if (waiting) al += `<div class="alert">📩 <b>${waiting}</b> visit request(s) waiting for your approval. Open More → Farm Owner Panel.</div>`;
+    if (waiting) al += `<div class="alert">📩 <b>${waiting}</b> visit request(s) waiting for your approval. Open ${isOwner() ? 'Orders' : 'More → Farm Owner Panel'}.</div>`;
   }
   if (posts()) {
     Object.keys(myCat()).forEach(s => {
@@ -509,14 +551,47 @@ function renderHome() {
     if (newOrd) al += `<div class="alert">🧾 <b>${newOrd}</b> new order(s) waiting for buyer payment.</div>`;
     if (toConfirm) al += `<div class="alert">💳 <b>${toConfirm}</b> payment(s) to confirm.</div>`;
   }
-  S.lots.filter(l => liveLot(l) && l.exp - now < SOON).forEach(l => {
+  S.lots.filter(l => liveLot(l) && l.exp - now < SOON && (!posts() || l.breeder === me)).forEach(l => {
     al += `<div class="alert">⏳ <b>${esc(sp(l.sp))}</b> from ${esc((S.users[l.breeder] || {}).name || l.breeder)} – ${timeLeft(l)}</div>`;
   });
-  $('alerts').innerHTML = al || '<div class="alert good">✅ All batches are healthy and on schedule.</div>';
-  $('recent').innerHTML = myOrders.slice(0, 4).map(o =>
-    `<div class="item"><div class="row" style="justify-content:space-between"><b>${esc(o.id)}</b>${chip(o.status)}</div>
-     <span class="muted">${esc(sp(o.sp))} × ${o.qty} · ₱${Number(o.total).toFixed(2)}</span></div>`
-  ).join('') || emptyBox('🕘', 'No orders yet. Your recent activity will appear here.');
+  $('alerts').innerHTML = al || '<div class="alert good">✅ Nothing needs your attention right now.</div>';
+  renderMyDash();
+}
+
+// Personal summary built only from the user's own orders and bookings (the server already filters them)
+function renderMyDash() {
+  const el = $('myDash'); if (!el) return;
+  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in under More to see your dashboard.'); return; }
+  const t0 = today();
+  const orders = S.orders.filter(o => o.buyer === me || o.breeder === me);
+  const bought = orders.filter(o => o.buyer === me && o.status === 'Received');
+  const sold = orders.filter(o => o.breeder === me && o.status === 'Received');
+  const pendingPay = orders.filter(o => o.buyer === me && o.status === 'Awaiting Payment').length;
+  const toConfirm = orders.filter(o => o.breeder === me && o.status === 'Paid – Awaiting Receipt').length;
+  const bookings = S.reservations.filter(r => r.user === me);
+  const upcoming = bookings.filter(r => liveRes(r) && r.date >= t0).length;
+  const myListings = posts() ? S.lots.filter(l => l.breeder === me) : [];
+  const activeLeft = myListings.filter(l => l.left > 0 && Date.now() < l.exp).reduce((a, l) => a + l.left, 0);
+
+  const stats = [];
+  if (isBuyer()) stats.push(['Pupae bought', bought.reduce((a, o) => a + o.qty, 0)], ['Total spent', money(bought.reduce((a, o) => a + o.total, 0))], ['Awaiting payment', pendingPay]);
+  if (posts()) stats.push(['Pupae sold', sold.reduce((a, o) => a + o.qty, 0)], ['Revenue', money(sold.reduce((a, o) => a + o.total, 0))], ['Pupae on sale', activeLeft]);
+  if (!isBuyer() && !posts()) stats.push(['Upcoming visits', upcoming], ['Bookings', bookings.length], ['Confirmed', bookings.filter(r => r.status === 'Confirmed').length]);
+
+  const recent = [
+    ...orders.map(o => ({when: o.created, html: `<b>${esc(o.id)}</b> · ${esc(sp(o.sp))} × ${o.qty} · ${money(o.total)} <span class="muted">${esc(o.buyer === me ? 'as buyer' : 'as seller')}</span> ${chip(o.status)}`})),
+    ...bookings.map(r => ({when: r.created || 0, html: `<b>${esc(r.ref)}</b> · ${esc(r.farm)} · ${esc(r.date)} · ${r.n} visitor(s) ${chip(r.status)}`}))
+  ].sort((a, b) => (b.when || 0) - (a.when || 0)).slice(0, 6);
+
+  const actions = [];
+  if (pendingPay) actions.push(`🧾 ${pendingPay} order(s) to pay`);
+  if (toConfirm) actions.push(`💳 ${toConfirm} payment(s) to confirm`);
+  if (bookings.some(r => r.status === 'Pending Payment')) actions.push('💙 A visit is approved and waiting for payment');
+
+  el.innerHTML = `
+    <div class="stats" style="margin-bottom:10px">${stats.map(([a, b]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(a)}</span></div>`).join('')}</div>
+    ${actions.length ? `<div class="alert">${actions.map(esc).join('<br>')}</div>` : ''}
+    ${recent.length ? recent.map(x => `<div class="item">${x.html}</div>`).join('') : emptyBox('🕘', 'Your transactions will appear here.')}`;
 }
 
 // ===== MARKET =====
@@ -526,7 +601,7 @@ function butterflySVG(c) {
 function pupaSVG(c) {
   return `<svg viewBox="0 0 60 90" width="44" height="62"><path d="M30 4 C48 14 50 50 30 84 C10 50 12 14 30 4Z" fill="${c[1]}" stroke="${c[0]}" stroke-width="3"/><path d="M18 30 Q30 36 42 30 M16 46 Q30 54 44 46 M20 62 Q30 68 40 62" stroke="${c[0]}" stroke-width="2" fill="none"/></svg>`;
 }
-// Market shows one breeder's catalog at a time. Buyers see every breeder; breeders see their own by default.
+// One breeder catalog at a time. Breeders open their own by default.
 function renderMarket() {
   const list = Object.keys(S.users).filter(x => S.users[x].role === 'breeder');
   if (!viewCat || list.indexOf(viewCat) < 0) viewCat = (isBreeder() && list.indexOf(me) > -1) ? me : (list[0] || '');
@@ -639,7 +714,7 @@ function renderSales() {
   });
 }
 
-// ===== PUPAE TAB =====
+// ===== PUPAE TAB (breeders post, buyers order) =====
 function profileOf(u) {
   return {name: u.name, phone: u.phone, email: u.email, organization: u.org, address: u.address, gcash: u.gcash};
 }
@@ -661,7 +736,7 @@ function renderPupaeShell() {
         <button class="btn" onclick="postLot()">Post Fresh Pupae (valid 2 days)</button>
       </div>
       <div class="card"><h3>📦 My Listings</h3><div class="tw" id="lotList"></div></div>
-      <div class="card"><h3>💬 Orders</h3><div id="orderList"></div></div>`;
+      <div class="card"><h3>💬 My Orders</h3><div id="orderList"></div></div>`;
     updPostPrice();
   } else {
     $('vPupae').innerHTML = `
@@ -672,7 +747,6 @@ function renderPupaeShell() {
   }
   renderLots(); renderOrders();
 }
-// Shows the breeder's catalog price for the chosen species
 function updPostPrice() {
   const el = $('bPriceInfo'), s = $('bSp').value;
   if (!el) return;
@@ -711,7 +785,7 @@ function renderLots() {
           : l.left > 0 ? '<span class="chip ok">For sale · ' + timeLeft(l) + '</span>' : '<span class="chip">Sold out</span>';
         return `<tr><td>${esc(sp(l.sp))}</td><td>${l.left} / ${l.qty}</td><td>₱${Number(l.price).toFixed(2)}</td>
         <td>${st}</td>
-        <td>${liveLot(l) || (l.left > 0 && Date.now() < l.exp) ? `<button class="ghost" onclick="editLeft('${l.id}')">Set count</button> <button class="ghost" onclick="withdraw('${l.id}')">Withdraw</button>` : ''}</td></tr>`;
+        <td>${l.left > 0 && Date.now() < l.exp ? `<button class="ghost" onclick="editLeft('${l.id}')">Set count</button> <button class="ghost" onclick="withdraw('${l.id}')">Withdraw</button>` : ''}</td></tr>`;
       }).join('') + '</tbody></table>' : emptyBox('📦', 'No listings yet. Post your first fresh batch above.');
   } else {
     const av = S.lots.filter(liveLot).sort((a, b) => b.created - a.created);
@@ -734,22 +808,22 @@ function renderOrders() {
   const box = $('orderList'); if (!box) return;
   const list = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
   box.innerHTML = list.map(o => {
-    const asBuyer = o.buyer === me, asSeller = o.breeder === me;
+    const asBuyer = o.buyer === me;
     let act = '';
     if (asBuyer && o.status === 'Awaiting Payment') {
       const gc = (S.users[o.breeder] || {}).gcash || 'the seller';
-      act = `<p class="muted">💙 Send <b>₱${Number(o.total).toFixed(2)}</b> via GCash to <b>${esc(gc)}</b>, then enter the reference number:</p>
+      act = `<p class="muted">💙 Send <b>${money(o.total)}</b> via GCash to <b>${esc(gc)}</b>, then enter the reference number:</p>
         <div class="row"><input id="pr${o.id}" inputmode="numeric" placeholder="GCash reference no." style="flex:1;margin:0"><button class="btn" style="width:auto" onclick="confirmPay('${o.id}')">I've Paid</button><button class="ghost" onclick="cancelOrder('${o.id}')">Cancel</button></div>`;
     } else if (asBuyer && o.status === 'Paid – Awaiting Receipt') {
       act = '<p class="muted">Payment submitted. Waiting for the seller to confirm.</p>';
     }
-    if (asSeller && o.status === 'Paid – Awaiting Receipt') act = `<button class="btn" onclick="markReceived('${o.id}')">Payment received – mark complete</button>`;
-    if (asSeller && o.status === 'Awaiting Payment') act = `<button class="ghost" onclick="cancelOrder('${o.id}')">Cancel order</button>`;
+    if (!asBuyer && o.status === 'Paid – Awaiting Receipt') act = `<button class="btn" onclick="markReceived('${o.id}')">Payment received – mark complete</button>`;
+    if (!asBuyer && o.status === 'Awaiting Payment') act = `<button class="ghost" onclick="cancelOrder('${o.id}')">Cancel order</button>`;
     const contact = asBuyer
       ? `Seller: ${esc(o.sellerName)}${o.sellerPhone ? ' · ' + esc(o.sellerPhone) : ''}`
       : `Buyer: ${esc(o.buyerName)} · ${esc(o.buyerPhone)}${o.buyerEmail ? ' · ' + esc(o.buyerEmail) : ''}<br>📍 ${esc(o.buyerAddress)}`;
     return `<div class="item"><div class="row" style="justify-content:space-between"><b>${esc(o.id)}</b>${chip(o.status)}</div>
-      <div>${esc(sp(o.sp))} × ${o.qty} · <b>₱${Number(o.total).toFixed(2)}</b></div>
+      <div>${esc(sp(o.sp))} × ${o.qty} · <b>${money(o.total)}</b></div>
       <span class="muted">${contact}${o.payRef ? ' · GCash ref ' + esc(o.payRef) : ''}</span>${act ? '<div style="margin-top:8px">' + act + '</div>' : ''}</div>`;
   }).join('') || emptyBox('🧾', 'No orders yet.');
 }
@@ -785,7 +859,7 @@ function withdraw(id) {
     .catch(e => toast(errText(e)));
 }
 
-// ===== FARM VISITS =====
+// ===== FARM VISITS (visitors) =====
 function initVisits() {
   if (!$('rFarm').options.length) {
     Object.keys(FARMS).forEach(f => $('rFarm').add(new Option(f, f)));
@@ -808,18 +882,19 @@ function farmChanged() {
 }
 function renderSlots() {
   const f = farm(), date = $('rDate').value, g = nVis(), box = $('slots');
-  const closed = (S.park.closed || []).indexOf(date) > -1;
+  const seats = capOn(f, date);
+  const closed = (S.park.closed || []).indexOf(date) > -1 || seats <= 0;
   box.innerHTML = '';
   if (closed) { box.innerHTML = '<span class="note">Closed on this date. Please choose another.</span>'; selSlot = ''; }
   else SLOTS.forEach(s => {
-    const left = fc(f) - booked(f, date, s), b = document.createElement('button');
+    const left = seats - booked(f, date, s), b = document.createElement('button');
     b.className = 'slot' + (selSlot === s ? ' sel' : '');
     b.disabled = left <= 0 || g > left || g < 1;
     b.innerHTML = `${s}<br><small>${Math.max(left, 0)} seat(s) left</small>`;
     b.onclick = () => { selSlot = s; renderSlots(); };
     box.appendChild(b);
   });
-  if (selSlot && (closed || fc(f) - booked(f, date, selSlot) < g)) selSlot = '';
+  if (selSlot && (closed || seats - booked(f, date, selSlot) < g)) selSlot = '';
   $('rTotal').textContent = (g * fp(f)).toFixed(2);
 }
 function reserve() {
@@ -844,7 +919,7 @@ function showPay(ref) {
   const box = $('payBox'); box.classList.remove('hide');
   box.innerHTML = `<h3 style="margin-top:0">💙 Pay with GCash – ${esc(r.ref)}</h3>
     <p>Your booking is approved. ${esc(r.farm)}<br>${esc(r.date)}, ${esc(r.slot)} · ${r.n} visitor(s)</p>
-    <p>Amount: <b>₱${Number(r.total).toFixed(2)}</b></p>
+    <p>Amount: <b>${money(r.total)}</b></p>
     <p>Send to: <b>${esc(S.park.gNo || 'the farm (ask via messages)')}</b>${S.park.gName ? ' · ' + esc(S.park.gName) : ''}</p>
     <p class="muted">Open GCash → Send Money → enter the amount above, then type the 13-digit reference number from your receipt.</p>
     <div class="row"><input type="text" id="payRef" inputmode="numeric" placeholder="GCash reference no." style="flex:1;margin:0"><button class="btn" style="width:auto" onclick="submitPay('${r.ref}')">I've Paid</button></div>
@@ -868,13 +943,115 @@ function renderRes() {
   const list = S.reservations.filter(r => me && r.user === me).sort((a, b) => (b.created || 0) - (a.created || 0));
   tb.innerHTML = list.map(r => `<tr>
     <td>${esc(r.ref)}</td><td>${esc(r.farm)}</td><td>${esc(r.date)}</td><td>${esc(r.slot)}</td><td>${r.n}</td>
-    <td>₱${Number(r.total).toFixed(2)}</td><td>${chip(r.status)}${r.note ? '<br><small class="muted">' + esc(r.note) + '</small>' : ''}</td>
+    <td>${money(r.total)}</td><td>${chip(r.status)}${r.note ? '<br><small class="muted">' + esc(r.note) + '</small>' : ''}</td>
     <td>
       <button class="ghost" style="padding:4px 9px;margin:2px" onclick="openThread('${r.ref}')">💬</button>
       ${r.status === 'Pending Payment' ? `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="showPay('${r.ref}')">Pay</button>` : ''}
       ${['Awaiting Approval','Pending Payment','Payment Submitted'].indexOf(r.status) > -1 ? `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="cancelBooking('${r.ref}')">Cancel</button>` : ''}
     </td></tr>`).join('');
   $('resHint').style.display = list.length ? 'none' : 'block';
+}
+
+// ===== FARM OWNER: ORDERS & SEATS (own farm only) =====
+function renderFarm() {
+  const box = $('vFarm');
+  if (!isOwner()) { box.innerHTML = emptyBox('🏡', 'The Orders panel is for farm owners.'); return; }
+  if (!$('farmShell')) {
+    box.innerHTML = `
+      <div class="card" id="farmShell">
+        <h3 id="farmName">🏡 My Farm</h3>
+        <p class="muted" id="farmMeta" style="margin-top:-6px"></p>
+        <div class="stats" id="farmStats"></div>
+      </div>
+      <div class="card"><h3>📩 Orders needing approval</h3><div id="farmPending"></div></div>
+      <div class="card"><h3>📋 Booking history</h3><div id="farmHistory"></div></div>
+      <div class="card"><h3>🌸 Seats per slot &amp; peak season</h3>
+        <p class="muted" style="margin-top:-6px">Set how many visitors each time slot accepts for a date range. Raise it for peak season and lower it afterwards. Set 0 to close the farm on those dates.</p>
+        <div id="capList"></div>
+        <div class="item">
+          <label>From<input type="date" id="capFrom"></label>
+          <label>To<input type="date" id="capTo"></label>
+          <label>Seats per slot<input type="number" min="0" max="500" id="capSeats"></label>
+          <label>Label (optional)<input id="capLabel" placeholder="e.g. Christmas peak"></label>
+          <p class="note" id="capMsg"></p>
+          <button class="btn" onclick="addCapRule()">Save seat rule</button>
+        </div>
+        <p class="muted" style="margin-top:12px">Next 14 days (booked / seats per slot)</p>
+        <div class="tw" id="capDays"></div>
+      </div>`;
+  }
+  fillFarm();
+}
+function fillFarm() {
+  if (!$('farmShell')) return;
+  const f = myFarm(), info = FARMS[f] || {}, base = fc(f), t0 = today();
+  const list = S.reservations.filter(r => r.farm === f).sort((a, b) => (b.created || 0) - (a.created || 0));
+  const actionable = ['Awaiting Approval', 'Pending Payment', 'Payment Submitted'];
+  const pending = list.filter(r => actionable.indexOf(r.status) > -1);
+  const history = list.filter(r => actionable.indexOf(r.status) < 0);
+
+  $('farmName').textContent = '🏡 ' + (f || 'Farm not assigned');
+  $('farmMeta').textContent = f ? (info.loc || '') + ' · ₱' + fp(f) + ' per person' : 'Ask an administrator to assign your farm.';
+  $('farmStats').innerHTML = [
+    ['Awaiting approval', list.filter(r => r.status === 'Awaiting Approval').length],
+    ['To confirm payment', list.filter(r => r.status === 'Pending Payment' || r.status === 'Payment Submitted').length],
+    ['Confirmed visitors (upcoming)', list.filter(r => r.status === 'Confirmed' && r.date >= t0).reduce((a, r) => a + r.n, 0)],
+    ['Base seats per slot', base]
+  ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
+
+  $('farmPending').innerHTML = pending.map(farmRow).join('') || emptyBox('✅', 'No requests waiting.');
+  $('farmHistory').innerHTML = history.map(farmRow).join('') || emptyBox('📭', 'No past bookings yet.');
+
+  const rules = (S.capRules || {})[f] || [];
+  $('capList').innerHTML = rules.length
+    ? rules.map((r, i) => `<div class="item row" style="justify-content:space-between">
+        <span><b>${esc(r.label || 'Seat rule')}</b><br><small class="muted">${esc(r.from)} → ${esc(r.to)} · ${r.cap === 0 ? 'CLOSED' : r.cap + ' seats per slot'}</small></span>
+        <button class="ghost" style="padding:4px 9px" onclick="removeCapRule(${i})">Remove</button></div>`).join('')
+    : `<p class="muted">Using the base capacity of ${base} seats per slot every day.</p>`;
+
+  const days = [];
+  for (let i = 0; i < 14; i++) days.push(ymd(new Date(Date.now() + i * 864e5)));
+  $('capDays').innerHTML = `<table><thead><tr><th>Date</th>${SLOTS.map(s => `<th>${esc(s.split(' - ')[0])}</th>`).join('')}</tr></thead><tbody>` +
+    days.map(d => {
+      const c = capOn(f, d);
+      return `<tr><td>${d}</td>` + SLOTS.map(s => `<td>${c <= 0 ? 'closed' : booked(f, d, s) + '/' + c}</td>`).join('') + '</tr>';
+    }).join('') + '</tbody></table>';
+}
+function farmRow(r) {
+  let acts = `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="openThread('${r.ref}')">💬</button>`;
+  if (r.status === 'Awaiting Approval') acts += `<button class="btn" style="width:auto;padding:6px 12px;margin:2px" onclick="ownerAct('${r.ref}','approve')">Approve</button>`;
+  if (r.status === 'Payment Submitted') acts += `<button class="btn" style="width:auto;padding:6px 12px;margin:2px" onclick="ownerAct('${r.ref}','confirm')">Confirm payment</button>`;
+  if (['Awaiting Approval', 'Pending Payment', 'Payment Submitted'].indexOf(r.status) > -1) acts += `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="ownerAct('${r.ref}','reject')">Reject</button>`;
+  return `<div class="item">
+    <div class="row" style="justify-content:space-between"><b>${esc(r.ref)}</b>${chip(r.status)}</div>
+    <div>${esc(r.name)} · ${r.n} visitor(s)</div>
+    <span class="muted">${esc(r.date)} · ${esc(r.slot)}${r.phone ? ' · ' + esc(r.phone) : ''}${r.email ? ' · ' + esc(r.email) : ''}${r.payRef ? ' · GCash ' + esc(r.payRef) : ''}</span>
+    <div style="margin-top:8px">${acts}</div></div>`;
+}
+function addCapRule() {
+  const from = $('capFrom').value, to = $('capTo').value, seats = $('capSeats').value;
+  if (!from || !to || seats === '') { $('capMsg').className = 'note'; $('capMsg').textContent = 'Enter both dates and the seats per slot.'; return; }
+  const cur = ((S.capRules || {})[myFarm()] || []).slice();
+  cur.push({from: from, to: to, cap: parseInt(seats, 10), label: $('capLabel').value.trim()});
+  saveCapRules(cur);
+}
+function removeCapRule(i) {
+  const cur = ((S.capRules || {})[myFarm()] || []).slice();
+  cur.splice(i, 1);
+  saveCapRules(cur);
+}
+function saveCapRules(rules) {
+  const m = $('capMsg');
+  rpc('setFarmCapacity', me, myFarm(), rules).then(res => {
+    const w = res.warnings || [];
+    m.className = w.length ? 'note' : 'ok';
+    m.textContent = w.length
+      ? 'Saved. Warning: more visitors are already booked than the new limit on ' + w.join('; ')
+      : 'Seat rules saved.';
+    if (!w.length) { $('capFrom').value = ''; $('capTo').value = ''; $('capSeats').value = ''; $('capLabel').value = ''; }
+    toast('Seat rules saved');
+    loadAll(() => renderAll());
+  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
 // ===== BOOKING MESSAGES =====
@@ -902,13 +1079,10 @@ function sendThread() {
     .catch(e => toast(errText(e)));
 }
 
-// ===== FARM OWNER PANEL =====
+// ===== ADMIN: BOOKING APPROVAL (all farms) =====
 function renderOwnerPanel() {
-  const box = $('ownerBox'); if (!box || !canFarm()) return;
-  const u = myUser();
-  const list = S.reservations.filter(r => isAdmin() || r.farm === u.farm)
-    .sort((a, b) => (b.created || 0) - (a.created || 0));
-  const waiting = list.filter(r => r.status === 'Awaiting Approval').length;
+  const box = $('ownerBox'); if (!box || !isAdmin()) return;
+  const list = S.reservations.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
   const rows = list.map(r => {
     let acts = `<button class="ghost" style="padding:4px 8px;margin:2px" onclick="openThread('${r.ref}')">💬</button>`;
     if (r.status === 'Awaiting Approval') acts += `<button class="btn" style="width:auto;padding:5px 10px;margin:2px" onclick="ownerAct('${r.ref}','approve')">Approve</button>`;
@@ -920,9 +1094,9 @@ function renderOwnerPanel() {
       <td>${r.n}</td><td>${chip(r.status)}${r.payRef ? '<br><small class="muted">GCash ' + esc(r.payRef) + '</small>' : ''}</td>
       <td>${acts}</td></tr>`;
   }).join('');
-  box.innerHTML = `<p class="muted">Farm: <b>${esc(u.farm || (isAdmin() ? 'All farms (admin)' : 'not assigned yet'))}</b> · <b>${waiting}</b> request(s) waiting for approval</p>` +
-    (list.length ? `<div class="tw"><table><thead><tr><th>Booking</th><th>Visitor</th><th>Date & time</th><th>Pax</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
-      : emptyBox('📭', 'No visit bookings yet.'));
+  box.innerHTML = list.length
+    ? `<div class="tw"><table><thead><tr><th>Booking</th><th>Visitor</th><th>Date & time</th><th>Pax</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+    : emptyBox('📭', 'No visit bookings yet.');
 }
 function ownerAct(ref, action) {
   let data = {};
@@ -958,7 +1132,13 @@ function renderMore() {
       <p class="note" id="pMsg"></p>
       <button class="btn" onclick="saveProfile()">Save profile</button></div>`;
 
-    if (canFarm()) h += `<div class="card"><h3>🏡 Farm Owner Panel</h3><div id="ownerBox"></div></div>`;
+    // Admin-only dashboard link. Other users never see it.
+    if (isAdmin() && dashboardToken) h += `<div class="card"><h3>📊 Admin dashboard</h3>
+      <p class="muted">All orders, bookings, users and activity. Link expires after one hour; log in again to refresh.</p>
+      <a href="${esc(APPS_SCRIPT_URL)}?page=dashboard&token=${encodeURIComponent(dashboardToken)}" target="_blank" rel="noopener"
+         style="display:block;text-align:center;color:var(--p1);font-weight:700;text-decoration:none">Open admin dashboard</a></div>`;
+
+    if (isAdmin()) h += `<div class="card"><h3>🏡 Farm bookings (all farms)</h3><div id="ownerBox"></div></div>`;
 
     if (isAdmin()) h += `<div class="card"><h3>🛡 User Management</h3>
       <p class="muted">Add farm owners and edit any user's profile, role, farm or password.</p>
@@ -968,13 +1148,12 @@ function renderMore() {
     if (canShopManage()) h += `<div class="card"><h3>🛠 Breeder Tools</h3>
       <p class="muted" style="margin:0 0 10px">Prices and flood flags are set per species in the Market tab (✏️ Manage prices). Farm visit prices and closed dates are set here.</p>
       <button class="btn" onclick="toggleManage()">${manage ? 'Exit Manage mode' : 'Enter Manage mode'}</button>
-      <div id="parkAdmin" class="${manage ? '' : 'hide'}" style="margin-top:12px"></div>
-      <a href="${esc(APPS_SCRIPT_URL)}?page=dashboard" target="_blank" rel="noopener" style="display:block;margin-top:12px;text-align:center;color:var(--p1);font-weight:700;text-decoration:none">📊 Open Dashboard</a></div>`;
+      <div id="parkAdmin" class="${manage ? '' : 'hide'}" style="margin-top:12px"></div></div>`;
 
     h += aiCard();
     h += `<div class="card"><button class="ghost" style="width:100%" onclick="logout()">Log out</button></div>`;
   }
-  h += `<div class="card"><h3>📝 Audit trail</h3><p class="muted">Every action is saved to the Activity sheet.</p></div>`;
+  h += `<div class="card"><h3>📝 Audit trail</h3><p class="muted">Your actions are recorded in the Activity sheet.</p></div>`;
   $('vMore').innerHTML = h;
   renderOwnerPanel();
   if (isAdmin() && adminUsers.length) renderAdminUsers();
@@ -998,7 +1177,7 @@ function renderParkAdmin() {
     <label>GCash account name<input id="setGName" value="${esc(S.park.gName || '')}" onchange="setPark()"></label>
     <label>GCash number<input id="setGNo" type="tel" value="${esc(S.park.gNo || '')}" onchange="setPark()"></label>
     <label>Price per person – selected farm (₱)<input type="number" min="0" id="setPrice" onchange="setPark()"></label>
-    <label>Max visitors per slot – selected farm<input type="number" min="1" id="setCap" onchange="setPark()"></label>
+    <label>Default seats per slot – selected farm<input type="number" min="1" id="setCap" onchange="setPark()"></label>
     <label>Closed date (all farms)<span class="row"><input type="date" id="closeDate" style="width:auto;flex:1;margin:0"><button class="btn" style="width:auto" onclick="addClosed()">Close</button></span></label>
     <p class="muted" id="closedList"></p></div>`;
   $('setPrice').value = fp(farm()); $('setCap').value = fc(farm());
@@ -1007,6 +1186,7 @@ function renderParkAdmin() {
 function setPark() {
   S.park.gName = $('setGName').value.trim(); S.park.gNo = $('setGNo').value.trim();
   const f = farm();
+  S.park.farms = S.park.farms || {};
   S.park.farms[f] = {p: Math.max(0, parseFloat($('setPrice').value) || 0), c: Math.max(1, parseInt($('setCap').value, 10) || 1)};
   save(); farmChanged(); log('Park settings', f);
 }
@@ -1086,27 +1266,22 @@ function createFarmOwner() {
   }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
-// ===== AI CLASSIFICATION =====
+// ===== AI CLASSIFICATION (saves each photo to its Drive dataset folder) =====
 function aiCard() {
   return `<div class="card"><h3>🔬 AI Classification</h3>
-    <p class="muted">Upload a butterfly photo for species, stage, disease, instar, pupae quality and sex analysis.</p>
-    <label>Analysis type<select id="aiType">
-      <option>Complete Analysis (All Models)</option>
-      <option>Species Identification</option>
-      <option>Lifecycle Stage</option>
-      <option>Larval Disease Detection</option>
-      <option>Larvae Instar</option>
-      <option>Pupae Defect Analysis</option>
-      <option>Gender Sexing</option>
-    </select></label>
+    <p class="muted">Upload a butterfly photo. The model identifies it and the photo is saved to the matching folder in the Butterfly Dataset on Google Drive.</p>
+    <label>What to identify<select id="aiTask">${CLS_TASKS.map(t => `<option value="${t.v}">${esc(t.t)}</option>`).join('')}</select></label>
     <input type="file" id="aiFile" accept="image/*" onchange="classifyPhoto(this)" style="margin-bottom:10px">
     <p class="note" id="aiMsg"></p>
-    <div id="aiResult"></div></div>`;
+    <div id="aiResult"></div>
+    ${isAdmin() ? `<button class="ghost" style="width:100%;margin-top:8px" onclick="showDatasetStatus()">📁 Check dataset counts</button><div id="dsResult" style="margin-top:10px"></div>` : ''}
+  </div>`;
 }
 function classifyPhoto(input) {
   const f = input.files[0]; if (!f) return;
   const msg = $('aiMsg'), out = $('aiResult');
   msg.className = 'muted'; msg.textContent = 'Analyzing… this can take up to a minute.'; out.innerHTML = '';
+  const task = $('aiTask').value;
   const reader = new FileReader(), im = new Image();
   reader.onload = () => {
     im.onload = () => {
@@ -1115,33 +1290,31 @@ function classifyPhoto(input) {
       c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
       c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
       const b64 = c.toDataURL('image/jpeg', 0.9).split(',')[1];
-      rpc('classifyImage', me, b64, 'image/jpeg', $('aiType').value)
-        .then(res => { msg.className = 'ok'; msg.textContent = 'Analysis complete.'; out.innerHTML = renderAi(res); })
+      rpc('classifyAndSave', me, {task: task, image: b64, mime: 'image/jpeg'})
+        .then(res => {
+          msg.className = 'ok'; msg.textContent = 'Analysis complete.';
+          out.innerHTML = `<div class="alert ${res.identified ? 'good' : ''}">
+            <b>${res.identified ? esc(res.label) : 'Not identified (saved as Unknown)'}</b>
+            · confidence ${(res.confidence * 100).toFixed(1)}%<br>
+            <a href="${esc(res.fileUrl)}" target="_blank" rel="noopener">View saved photo</a> ·
+            <a href="${esc(res.folderUrl)}" target="_blank" rel="noopener">Open folder</a></div>`;
+        })
         .catch(e => { msg.className = 'note'; msg.textContent = 'Classification failed: ' + errText(e); });
     };
     im.src = reader.result;
   };
   reader.readAsDataURL(f);
 }
-function renderAi(r) {
-  const section = (title, block, key) => {
-    if (!block) return '';
-    const rows = block.predictions.map(p => {
-      const text = key === 'instar' ? p.instar + ' · ' + p.label : p[key];
-      return `<div class="row" style="justify-content:space-between"><span>${esc(text)}</span><span>${(p.confidence * 100).toFixed(1)}%</span></div>`;
+function showDatasetStatus() {
+  const box = $('dsResult'); if (!box) return;
+  box.innerHTML = '<p class="muted">Loading…</p>';
+  rpc('datasetStatus', me).then(res => {
+    box.innerHTML = Object.keys(res.dataset).map(k => {
+      const t = res.dataset[k], labels = Object.keys(t.labels);
+      return `<div class="item"><b>${esc(t.folder)}</b>${t.found ? '' : ' <span class="chip bad">folder not found</span>'}
+        <div class="muted">${labels.length ? labels.map(l => esc(l) + ': ' + t.labels[l]).join(' · ') : 'No labels yet'}</div></div>`;
     }).join('');
-    return `<div class="item"><b>${title}</b>${rows}</div>`;
-  };
-  const s = r.summary || {};
-  const score = s.overallHealthScore == null ? 'N/A' : (s.overallHealthScore * 100).toFixed(1) + '%';
-  const acts = (s.recommendedActions || []).map(a => `<li><b>${esc(a.action)}:</b> ${esc(a.description)}</li>`).join('');
-  return section('🦋 Species', r.species, 'species')
-    + section('🐛 Lifecycle stage', r.stage, 'stage')
-    + section('🦠 Disease', r.disease, 'disease')
-    + section('📏 Larval instar', r.instar, 'instar')
-    + section('🔍 Pupae quality', r.defects, 'defect')
-    + section('⚥ Sex', r.sex, 'sex')
-    + `<div class="alert good"><b>Health score:</b> ${score} · <b>Grade:</b> ${esc(s.qualityGrade || 'N/A')}${acts ? '<ul>' + acts + '</ul>' : ''}</div>`;
+  }).catch(e => { box.innerHTML = '<p class="note">' + esc(errText(e)) + '</p>'; });
 }
 
 // ===== POPUP (buyers) =====
@@ -1164,7 +1337,10 @@ function boot() {
   $('app').classList.remove('hide');
   $('nav').classList.remove('hide');
   let u = null;
-  try { u = sessionStorage.getItem('bpUser'); } catch (e) {}
+  try {
+    u = sessionStorage.getItem('bpUser');
+    dashboardToken = sessionStorage.getItem('bpDashboardToken') || '';
+  } catch (e) {}
   me = u || null;
   loadAll(() => {
     initVisits();
