@@ -1340,15 +1340,111 @@ function createFarmOwner() {
 }
 
 // ===== AI CLASSIFICATION (saves each photo to its Drive dataset folder) =====
+// ===== AI CLASSIFICATION: camera, upload, and phone camera app =====
 function aiCard() {
   return `<div class="card"><h3>🔬 AI Classification</h3>
-    <p class="muted">Upload a butterfly photo. The model identifies it and the photo is saved to the matching folder in the Butterfly Dataset on Google Drive.</p>
+    <p class="muted">Take a photo with the camera or upload one. The model identifies it and the photo is saved to the matching folder in the Butterfly Dataset on Google Drive.</p>
     <label>What to identify<select id="aiTask">${CLS_TASKS.map(t => `<option value="${t.v}">${esc(t.t)}</option>`).join('')}</select></label>
-    <input type="file" id="aiFile" accept="image/*" onchange="classifyPhoto(this)" style="margin-bottom:10px">
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn" style="flex:1" onclick="camOpen()">📷 Use camera</button>
+      <label class="ghost" style="flex:1;text-align:center;padding:12px;border-radius:12px;cursor:pointer;color:var(--p1);font-weight:600;margin:0">📁 Upload photo
+        <input type="file" accept="image/*" style="display:none" onchange="classifyPhoto(this)">
+      </label>
+    </div>
+    <div id="camBox" class="hide" style="margin-bottom:10px">
+      <video id="camVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#000"></video>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="flex:1" onclick="camCapture()">Capture</button>
+        <button class="ghost" onclick="camClose()">Cancel</button>
+      </div>
+    </div>
+    <label class="muted" style="font-weight:600">Or use the phone's camera app
+      <input type="file" accept="image/*" capture="environment" onchange="classifyPhoto(this)">
+    </label>
     <p class="note" id="aiMsg"></p>
     <div id="aiResult"></div>
     ${isAdmin() ? `<button class="ghost" style="width:100%;margin-top:8px" onclick="showDatasetStatus()">📁 Check dataset counts</button><div id="dsResult" style="margin-top:10px"></div>` : ''}
   </div>`;
+}
+
+// Opens the live camera preview (works on GitHub Pages and the Android app)
+async function camOpen() {
+  camClose();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showAiErr(new Error('This page cannot open the camera. Use "Upload photo" or "Phone camera app" instead.'));
+    return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false});
+    const v = $('camVideo');
+    v.srcObject = camStream;
+    await v.play().catch(() => {});
+    $('camBox').classList.remove('hide');
+    $('aiMsg').textContent = '';
+  } catch (e) {
+    showAiErr(new Error('The camera is not available (' + (e.name || e.message) + '). Allow camera access, or use "Upload photo".'));
+  }
+}
+
+function camCapture() {
+  const v = $('camVideo');
+  if (!v || !v.videoWidth) { toast('The camera is still starting. Try again in a moment.'); return; }
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const dataUrl = c.toDataURL('image/jpeg', 0.92);
+  camClose();
+  imageToB64(dataUrl).then(classifyB64).catch(showAiErr);
+}
+
+function camClose() {
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  const b = $('camBox'); if (b) b.classList.add('hide');
+}
+
+// Upload or phone-camera-app photo
+function classifyPhoto(input) {
+  const f = input.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => imageToB64(reader.result).then(classifyB64).catch(showAiErr);
+  reader.readAsDataURL(f);
+  input.value = '';
+}
+
+// Resizes any image to a JPEG (max 1024 px) and returns base64 for the server
+function imageToB64(src, maxSide = 1024) {
+  return new Promise((ok, no) => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, maxSide / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      ok(c.toDataURL('image/jpeg', 0.9).split(',')[1]);
+    };
+    im.onerror = () => no(new Error('Could not read the image.'));
+    im.src = src;
+  });
+}
+
+// Sends one photo to the server and shows the result
+function classifyB64(b64) {
+  const task = $('aiTask').value;
+  const msg = $('aiMsg'), out = $('aiResult');
+  msg.className = 'muted'; msg.textContent = 'Analyzing… this can take up to a minute.'; out.innerHTML = '';
+  return rpc('classifyAndSave', me, {task: task, image: b64, mime: 'image/jpeg'}).then(res => {
+    msg.className = 'ok'; msg.textContent = 'Analysis complete.';
+    out.innerHTML = `<div class="alert ${res.identified ? 'good' : ''}">
+      <b>${res.identified ? esc(res.label) : 'Not identified (saved as Unknown)'}</b>
+      · confidence ${(res.confidence * 100).toFixed(1)}%<br>
+      <a href="${esc(res.fileUrl)}" target="_blank" rel="noopener">View saved photo</a> ·
+      <a href="${esc(res.folderUrl)}" target="_blank" rel="noopener">Open folder</a></div>`;
+  }).catch(showAiErr);
+}
+
+function showAiErr(e) {
+  const m = $('aiMsg');
+  if (m) { m.className = 'note'; m.textContent = 'Classification failed: ' + errText(e); }
 }
 function classifyPhoto(input) {
   const f = input.files[0]; if (!f) return;
