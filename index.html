@@ -524,6 +524,7 @@ function logout() {
 // ===== NAVIGATION =====
 function showView(v) {
   if (['visits', 'pupae', 'farm'].indexOf(v) > -1 && !me) { toast('Please log in first (More tab).'); v = 'more'; }
+  if (me && myUser().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
   // A farm owner's Orders button opens the farm panel
   if (v === 'visits' && isOwner()) v = 'farm';
   if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
@@ -1195,8 +1196,32 @@ function renderMore() {
       <label>Address<input id="pAddr" value="${esc(u.address || '')}"></label>
       ${posts() || isAdmin() ? `<label>GCash number<input id="pGcash" type="tel" value="${esc(u.gcash || '')}"></label>` : ''}
       <p class="note" id="pMsg"></p>
+      if (u.mustChange) h += `<div class="alert red">🔐 Your administrator gave you a temporary password. Please set your own password to continue.</div>`;
+    h += passwordCard();
       <button class="btn" onclick="saveProfile()">Save profile</button></div>`;
-
+// ===== CHANGE PASSWORD (every logged-in user) =====
+function passwordCard() {
+  return `<div class="card"><h3>🔑 Change password</h3>
+    <p class="muted">Enter your current password (or the temporary one from your administrator), then choose a new password.</p>
+    <label>Current password<input id="pwOld" type="password" autocomplete="current-password"></label>
+    <label>New password (at least 8 characters)<input id="pwNew" type="password" autocomplete="new-password"></label>
+    <label>Confirm new password<input id="pwNew2" type="password" autocomplete="new-password"></label>
+    <p class="note" id="pwMsg"></p>
+    <button class="btn" onclick="changeMyPwd()">Save new password</button>
+  </div>`;
+}
+function changeMyPwd() {
+  const o = $('pwOld').value, n = $('pwNew').value, n2 = $('pwNew2').value, m = $('pwMsg');
+  if (!o || !n) { m.className = 'note'; m.textContent = 'Enter your current and new password.'; return; }
+  if (n !== n2) { m.className = 'note'; m.textContent = 'The new passwords do not match.'; return; }
+  if (n.length < 8) { m.className = 'note'; m.textContent = 'Use at least 8 characters.'; return; }
+  if (n === o) { m.className = 'note'; m.textContent = 'Choose a password different from the current one.'; return; }
+  m.className = 'muted'; m.textContent = 'Saving…';
+  rpc('changeMyPassword', me, o, n).then(() => {
+    toast('Password changed');
+    loadAll(() => renderMore());
+  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
+}
     // Breeders: their designated farm
     if (isBreeder() && myFarm()) h += farmEditorCard(myFarm(), false);
     else if (isBreeder()) h += `<div class="card"><h3>🏡 My farm</h3><p class="muted">No farm is designated to your account yet. The administrator will assign one.</p></div>`;
