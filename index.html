@@ -22,8 +22,8 @@ button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .btn:hover{filter:brightness(1.06)}
 .ghost{background:#f2eefc;color:var(--p1)}
 .ghost:hover{background:#e8e0fb}
-input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff;margin-top:4px;transition:border-color .15s,box-shadow .15s}
-input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(155,79,224,.18)}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff;margin-top:4px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(155,79,224,.18)}
 label{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.2px}
 .hero{background:linear-gradient(135deg,#4a2fc0 0%,#7b3fe4 55%,#c05ad8 100%);color:#fff;padding:22px 20px 62px;border-radius:0 0 32px 32px;position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
@@ -110,19 +110,22 @@ nav .ic{font-size:1.25rem;line-height:1}
 
   <main class="wrap">
     <section id="vHome">
-      <div class="stats">
-        <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
-        <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
-        <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
+      <div id="loginBox"></div>
+      <div id="homeMain">
+        <div class="stats">
+          <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
+          <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
+          <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
+        </div>
+        <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
+        <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
       </div>
-      <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
-      <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
     </section>
 
     <section id="vMarket" class="hide">
       <div class="card">
         <h3>🛍 Marketplace</h3>
-        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in under More to check out.</p>
+        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in on the Home page to check out.</p>
         <div id="catBar" style="margin-bottom:12px"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -199,11 +202,30 @@ nav .ic{font-size:1.25rem;line-height:1}
   </div>
 </div>
 
+<!-- QUALITY SURVEY (ISO/IEC 25010) -->
+<div id="survey" class="modal hide" onclick="if(event.target===this)closeSurvey()">
+  <div class="sheet">
+    <div class="row" style="justify-content:space-between"><h3 style="margin:0">📝 Quick quality survey</h3><button class="ghost" onclick="closeSurvey()">✕</button></div>
+    <p class="muted">Based on the ISO/IEC 25010 software quality model. Takes about 2 minutes. Rate each statement from 1 (strongly disagree) to 5 (strongly agree). You only need to answer once.</p>
+    <div id="svBody"></div>
+    <label style="margin-top:12px">Comments (optional)<textarea id="svComment" rows="3"></textarea></label>
+    <p class="note" id="svMsg"></p>
+    <button class="btn" onclick="submitSurveyForm()">Submit survey</button>
+  </div>
+</div>
+
 <div id="toast" class="hide"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkYNiVISuGz8yBEnEWlSJkuAndQAUhsamGZtjt8LEdpzooC_D0WhIXw3CSLSzFPwembQ/exec';
+// On Apps Script this is the current web app address. On GitHub Pages the fallback address is used.
+const SERVER_URL_FROM_APPS_SCRIPT = '<?= appUrl ?>';
+const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.indexOf('<?') === 0
+  ? 'https://script.google.com/macros/s/AKfycbxkYNiVISuGz8yBEnEWlSJkuAndQAUhsamGZtjt8LEdpzooC_D0WhIXw3CSLSzFPwembQ/exec'
+  : SERVER_URL_FROM_APPS_SCRIPT;
+const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
+// GitHub Pages cannot call Apps Script directly (the browser blocks it), so send visitors to the Apps Script address.
+if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname)) location.replace(APPS_SCRIPT_URL);
 
 // ===== DATA =====
 const SPECIES = {
@@ -224,7 +246,7 @@ const QA = [
   'Not yet matured (freshly pupated, within 2 days)'
 ];
 const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
-// Built-in farms. Names must match FARM_DEFAULTS in Code_final.gs exactly.
+// Built-in farms. Names must match FARM_DEFAULTS in Code.gs exactly.
 const FARMS = {
   'JCM Butterfly Breeding Farm':{loc:'Cawit, Boac, Marinduque',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
   'JCM Butterfly Farm':{loc:'Marinduque',ll:[13.4,121.9],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
@@ -243,7 +265,7 @@ const ROLE_LIST = ['purchaser','buyer','breeder','enthusiast','farmowner','admin
 const ROLE_NAME = {purchaser:'Purchaser',buyer:'Buyer',breeder:'Breeder',enthusiast:'Enthusiast / Visitor',farmowner:'Farm owner',admin:'Administrator'};
 const LIVE = ['Awaiting Approval','Pending Payment','Payment Submitted','Confirmed'];
 const SOON = 12 * 36e5;
-// Must match the task keys in Classification_final.gs
+// Must match the task keys in Classification.gs
 const CLS_TASKS = [
   {v:'species', t:'Species identification'},
   {v:'stage', t:'Lifecycle stage'},
@@ -260,12 +282,12 @@ const CHIP = {
 
 // ===== STATE =====
 let S = {catalog:{},park:{gName:'',gNo:'',closed:[],farms:{}},capRules:{},booked:{},farms:{},
-         salesRecord:[],reservations:[],lots:[],orders:[],users:{},media:{}};
+         salesRecord:[],reservations:[],lots:[],orders:[],users:{},media:{},survey:{done:false,items:[]}};
 let me = null, cart = {}, manage = false, selSlot = '', viewCat = '', busy = 0, saveT = 0, polling = false, sig = '',
     chart = null, threadRef = null, adminUsers = [], editing = '', dashboardToken = '', adminFarmPick = '',
     camStream = null;
 
-// ===== HELPERS (each defined once) =====
+// ===== HELPERS =====
 const $ = id => document.getElementById(id);
 const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sp = s => String(s).replace('Butterfly-', '');
@@ -301,9 +323,7 @@ const timeLeft = l => {
   const h = Math.floor(m / 36e5);
   return Math.floor(h / 24) + 'd ' + (h % 24) + 'h left';
 };
-// Every farm: built-in list plus farms created by breeders/admin
 const allFarmNames = () => Array.from(new Set([...Object.keys(FARMS), ...Object.keys(S.farms || {})])).sort();
-// Farm details: saved profile first, then built-in defaults
 const farmInfo = f => {
   const base = FARMS[f] || {}, pr = (S.farms || {})[f] || {};
   const ll = (pr.lat != null && pr.lng != null) ? [pr.lat, pr.lng] : (base.ll || [0, 0]);
@@ -324,9 +344,7 @@ const fc = n => {
   const o = S.park.farms && S.park.farms[n]; if (o && o.c != null) return o.c;
   return farmInfo(n).c;
 };
-// Seats per slot on a date, using the farm's seat rules (cap 0 = closed)
 const capOn = (f, d) => { let c = fc(f); ((S.capRules || {})[f] || []).forEach(r => { if (d >= r.from && d <= r.to) c = r.cap; }); return c; };
-// Booked seats for farm|date|slot (counts only, from the server)
 const booked = (f, d, s) => (S.booked || {})[f + '|' + d + '|' + s] || 0;
 
 function toast(t) {
@@ -338,7 +356,7 @@ function farmOptions(selected, allowNone) {
     allFarmNames().map(f => `<option value="${esc(f)}" ${f === selected ? 'selected' : ''}>${esc(f)}</option>`).join('');
 }
 
-// One function for every server call. Works in Apps Script and on GitHub Pages / Android.
+// One function for every server call. Works inside Apps Script (google.script.run) and on the Android/web wrapper (fetch).
 function rpc(fn, ...args) {
   if (IN_APPS_SCRIPT) {
     return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
@@ -352,19 +370,18 @@ function rpc(fn, ...args) {
     .then(t => {
       let j;
       try { j = JSON.parse(t); }
-      catch (e) { throw new Error('Server sent a web page instead of data. Set the deployment to "Who has access: Anyone" and deploy a new version.'); }
+      catch (e) { throw new Error('The server sent a sign-in page instead of data. Set the deployment to "Who has access: Anyone" and deploy a new version.'); }
       if (j.error) throw new Error(j.error);
       return j.result;
     })
     .catch(e => {
-      if (e instanceof TypeError) throw new Error('Browser could not reach the Apps Script URL. Check that access is set to Anyone.');
+      if (e instanceof TypeError) throw new Error('The browser blocked the connection to the server. Open the app from its Apps Script link: ' + APPS_SCRIPT_URL);
       throw e;
     });
 }
 function log(action, detail) { if (me) rpc('logActivity', me, roleOf() || '-', action, String(detail || '')).catch(() => {}); }
 
-// ===== DATA SYNC (real-time polling) =====
-// The server sends each user only their own orders and bookings, plus public market data.
+// ===== DATA SYNC =====
 function applyState(x) {
   if (!x) return;
   S.catalog = x.catalog || {};
@@ -377,6 +394,7 @@ function applyState(x) {
   S.lots = x.lots || [];
   S.orders = x.orders || [];
   S.users = x.users || {};
+  S.survey = x.survey || {done: false, items: []};
 }
 function setLive(ok) {
   $('live').classList.toggle('off', !ok);
@@ -391,7 +409,6 @@ function loadAll(cb) {
     if (cb) cb();
   });
 }
-// Only park settings (GCash details, closed dates) are saved from the client
 function save() {
   if (!me) return;
   clearTimeout(saveT);
@@ -405,7 +422,8 @@ function poll() {
   if (busy || saveT) return;
   loadAll(() => {
     const s = JSON.stringify([S.catalog, S.farms, S.capRules, S.booked, S.lots.map(l => [l.id, l.left, l.price]),
-      S.orders.map(o => [o.id, o.status]), S.reservations.map(r => [r.ref, r.status]), S.salesRecord.length, me ? S.users[me] : null]);
+      S.orders.map(o => [o.id, o.status]), S.reservations.map(r => [r.ref, r.status]), S.salesRecord.length,
+      S.survey.done, me ? S.users[me] : null]);
     if (s !== sig) { sig = s; renderAll(); }
     if (me) { checkPopup(); if (threadRef) loadThread(); }
   });
@@ -429,12 +447,11 @@ function renderHeader() {
 function applyNav() {
   $('nPupae').classList.toggle('hide', !me || ['enthusiast', 'farmowner', 'admin'].indexOf(roleOf()) > -1);
   $('nVisits').classList.toggle('hide', !me);
-  // Farm owners see "Orders" in place of "Visits"
   $('nVisitsIc').textContent = isOwner() ? '📋' : '🎫';
   $('nVisitsLabel').textContent = isOwner() ? 'Orders' : 'Visits';
 }
 
-// ===== AUTH =====
+// ===== LOGIN / REGISTER (shown on the Home page) =====
 function authCard() {
   return `<div class="card"><h3>🔐 Log in or register</h3>
     <div class="seg"><button id="tabLi" class="on" onclick="showAuth('login')">Log in</button><button id="tabRg" onclick="showAuth('register')">Register</button></div>
@@ -458,6 +475,7 @@ function authCard() {
       <label>Choose a username<input id="rgUser" autocomplete="username"></label>
       <label>Choose a password<input id="rgPass" type="password" autocomplete="new-password"></label>
       <label>Confirm password<input id="rgPass2" type="password" autocomplete="new-password"></label>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-weight:600"><input type="checkbox" id="rgTerms" style="width:auto;margin:3px 0 0"> I have read and agree to the <a href="${LEGAL_URL}" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a></label>
       <p class="note" id="lMsg2"></p>
       <button class="btn" onclick="doRegister()">Create Account</button>
     </div>
@@ -482,8 +500,9 @@ function doLogin() {
 function doRegister() {
   const r = $('lRole').value, u = $('rgUser').value.trim().toLowerCase(), pw = $('rgPass').value, m = $('lMsg2');
   if (pw !== $('rgPass2').value) { m.textContent = 'Passwords do not match.'; return; }
+  if (!$('rgTerms').checked) { m.textContent = 'Please accept the Terms and Conditions and Privacy Policy to register.'; return; }
   const x = {
-    mode: 'register', name: $('lName').value.trim(), phone: $('lPhone').value.trim(), email: $('lEmail').value.trim(),
+    mode: 'register', terms: true, name: $('lName').value.trim(), phone: $('lPhone').value.trim(), email: $('lEmail').value.trim(),
     org: $('lOrg').value.trim(), addr: $('lAddr').value.trim(), idType: $('lIdType').value, idNo: $('lIdNo').value.trim()
   };
   auth('register', r, u, pw, x, m);
@@ -521,17 +540,16 @@ function logout() {
   me = null; cart = {}; manage = false; adminUsers = []; editing = '';
   renderHeader(); applyNav();
   $('vFarm').innerHTML = '';
-  showView('more');
+  showView('home');
   toast('Logged out');
 }
 
 // ===== NAVIGATION =====
 function showView(v) {
   camClose();
-  if (['visits', 'pupae', 'farm'].indexOf(v) > -1 && !me) { toast('Please log in first (More tab).'); v = 'more'; }
-  // Users with a mandatory password change stay on More until they set a new one
+  // Logged-out visitors can only see Home (with the login form) and More (legal section)
+  if (!me && v !== 'home' && v !== 'more' && v !== 'market') { toast('Please log in first.'); v = 'home'; }
   if (me && myUser().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
-  // A farm owner's Orders button opens the farm panel
   if (v === 'visits' && isOwner()) v = 'farm';
   if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
   ['home', 'market', 'pupae', 'visits', 'farm', 'more'].forEach(x => {
@@ -550,16 +568,29 @@ function showView(v) {
   window.scrollTo(0, 0);
 }
 
-// ===== HOME & MY DASHBOARD =====
+// ===== HOME & ALERTS =====
 function renderHome() {
+  const logged = !!me && !!S.users[me];
+  if (!logged) {
+    // Logged out: show the login / register form first
+    if (!$('loginBox').innerHTML) $('loginBox').innerHTML = authCard();
+    $('homeMain').classList.add('hide');
+    return;
+  }
+  $('loginBox').innerHTML = '';
+  $('homeMain').classList.remove('hide');
+
   const now = Date.now(), u = myUser();
-  const myOrders = S.orders.filter(o => me && (o.buyer === me || o.breeder === me)).sort((a, b) => b.created - a.created);
-  const myBookings = S.reservations.filter(r => me && r.user === me);
+  const myOrders = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
+  const myBookings = S.reservations.filter(r => r.user === me);
   $('stAvail').textContent = S.lots.filter(liveLot).reduce((a, l) => a + l.left, 0);
   $('stOrders').textContent = myOrders.length;
   $('stVisits').textContent = myBookings.length;
 
   let al = '';
+  if (!S.survey.done) {
+    al += `<div class="alert good">📝 Please answer our 2-minute quality survey (ISO/IEC 25010). <button class="ghost" style="margin-left:6px;padding:4px 10px" onclick="openSurvey()">Answer now</button></div>`;
+  }
   if (isOwner() || isAdmin()) {
     const waiting = S.reservations.filter(r => r.status === 'Awaiting Approval' && (isAdmin() || r.farm === u.farm)).length;
     if (waiting) al += `<div class="alert">📩 <b>${waiting}</b> visit request(s) waiting for your approval. Open ${isOwner() ? 'Orders' : 'More → Farm bookings'}.</div>`;
@@ -580,10 +611,9 @@ function renderHome() {
   renderMyDash();
 }
 
-// Personal summary from the user's own orders and bookings (the server already filters them)
 function renderMyDash() {
   const el = $('myDash'); if (!el) return;
-  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in under More to see your dashboard.'); return; }
+  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in to see your dashboard.'); return; }
   const t0 = today();
   const orders = S.orders.filter(o => o.buyer === me || o.breeder === me);
   const bought = orders.filter(o => o.buyer === me && o.status === 'Received');
@@ -615,6 +645,46 @@ function renderMyDash() {
     ${recent.length ? recent.map(x => `<div class="item">${x.html}</div>`).join('') : emptyBox('🕘', 'Your transactions will appear here.')}`;
 }
 
+// ===== SURVEY (ISO/IEC 25010) =====
+function openSurvey() {
+  if (!me) { toast('Please log in first.'); return; }
+  if (S.survey.done) { toast('Thank you, you already answered the survey.'); return; }
+  let h = '', last = '';
+  (S.survey.items || []).forEach(it => {
+    if (it.c !== last) { h += `<h4 style="margin:14px 0 6px;color:var(--p1)">${esc(it.c)}</h4>`; last = it.c; }
+    h += `<div class="item"><div style="margin-bottom:6px">${esc(it.q)}</div><div class="row">` +
+      [1, 2, 3, 4, 5].map(n => `<label style="display:inline-flex;align-items:center;gap:4px;margin:0;font-weight:600;color:var(--text)"><input type="radio" name="sv_${it.id}" value="${n}" style="width:auto;margin:0"> ${n}</label>`).join('') +
+      `</div></div>`;
+  });
+  $('svBody').innerHTML = h;
+  $('svMsg').textContent = '';
+  $('survey').classList.remove('hide');
+}
+function closeSurvey() { $('survey').classList.add('hide'); }
+function submitSurveyForm() {
+  const answers = {}, missing = [];
+  (S.survey.items || []).forEach(it => {
+    const r = document.querySelector(`input[name="sv_${it.id}"]:checked`);
+    if (r) answers[it.id] = parseInt(r.value, 10); else missing.push(it.id);
+  });
+  const m = $('svMsg');
+  if (missing.length) { m.className = 'note'; m.textContent = 'Please answer every statement (' + missing.length + ' left).'; return; }
+  m.className = 'muted'; m.textContent = 'Sending…';
+  rpc('submitSurvey', me, answers, $('svComment').value.trim()).then(() => {
+    closeSurvey(); toast('Thank you! Survey submitted.');
+    loadAll(() => renderAll());
+  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
+}
+function loadSurveyResults() {
+  rpc('getSurveyResults', me).then(r => {
+    $('svResults').innerHTML = `<p class="muted">${r.responses} response(s) · overall average <b>${r.overall == null ? '–' : r.overall}</b> / 5</p>
+      <div class="tw"><table><thead><tr><th>Characteristic (ISO/IEC 25010)</th><th>Average</th></tr></thead><tbody>
+      ${r.characteristics.map(c => `<tr><td>${esc(c.name)}</td><td>${c.average == null ? '–' : c.average}</td></tr>`).join('')}
+      </tbody></table></div>
+      ${r.comments.length ? '<h4 style="margin:12px 0 6px">Recent comments</h4>' + r.comments.map(c => `<div class="item">${esc(c)}</div>`).join('') : ''}`;
+  }).catch(e => toast(errText(e)));
+}
+
 // ===== MARKET =====
 function butterflySVG(c) {
   return `<svg viewBox="0 0 100 80" width="64" height="52"><ellipse cx="30" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(-20 30 28)"/><ellipse cx="70" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(20 70 28)"/><ellipse cx="34" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><ellipse cx="66" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><rect x="46" y="15" width="8" height="52" rx="4" fill="#333"/></svg>`;
@@ -622,7 +692,6 @@ function butterflySVG(c) {
 function pupaSVG(c) {
   return `<svg viewBox="0 0 60 90" width="44" height="62"><path d="M30 4 C48 14 50 50 30 84 C10 50 12 14 30 4Z" fill="${c[1]}" stroke="${c[0]}" stroke-width="3"/><path d="M18 30 Q30 36 42 30 M16 46 Q30 54 44 46 M20 62 Q30 68 40 62" stroke="${c[0]}" stroke-width="2" fill="none"/></svg>`;
 }
-// One breeder catalog at a time. Breeders open their own by default.
 function renderMarket() {
   const box = $('grid'); if (!box) return;
   const list = Object.keys(S.users).filter(x => S.users[x].role === 'breeder');
@@ -684,8 +753,8 @@ function setImg(s, kind, input) {
   };
   reader.readAsDataURL(f);
 }
-// Cart keys are "breederUsername|species", so each item keeps its own breeder's price
 function addToCart(b, s, i) {
+  if (!me) { toast('Please log in first to add items.'); showView('home'); return; }
   if (floodedFor(b, s)) return;
   const q = Math.max(1, parseInt($('qty' + i).value, 10) || 1), k = b + '|' + s;
   cart[k] = (cart[k] || 0) + q;
@@ -708,7 +777,7 @@ function renderCart() {
 }
 function toggleCart(open) { $('cart').classList.toggle('hide', !open); }
 function checkout() {
-  if (!me) { toast('Please log in first (More tab) to check out.'); toggleCart(false); showView('more'); return; }
+  if (!me) { toast('Please log in on the Home page to check out.'); toggleCart(false); showView('home'); return; }
   const items = Object.keys(cart).map(k => { const [b, s] = k.split('|'); return {breeder: b, sp: s, qty: cart[k]}; });
   if (!items.length) return toast('Your cart is empty.');
   rpc('placeOrder', me, items)
@@ -720,7 +789,7 @@ function checkout() {
     .catch(e => toast(errText(e)));
 }
 
-// ===== SALES RECORD (server sends only what this user may see) =====
+// ===== SALES RECORD =====
 function renderSales() {
   const box = $('salesBody'); if (!box) return;
   const rows = S.salesRecord || [];
@@ -741,7 +810,6 @@ function renderSales() {
     options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true, ticks: {precision: 0}}}}
   });
 }
-// Shown only to breeders, buyers and admins. Guests and enthusiasts never see this card.
 function salesCard() {
   if (!me || ['breeder', 'buyer', 'purchaser', 'admin'].indexOf(roleOf()) < 0) return '';
   const title = isAdmin() ? '📈 All sales records' : isBreeder() ? '📈 My sales record' : '🧾 My purchase record';
@@ -752,7 +820,7 @@ function salesCard() {
     <canvas id="salesChart" height="140"></canvas></div>`;
 }
 
-// ===== PUPAE TAB (breeders post, buyers order) =====
+// ===== PUPAE TAB =====
 function profileOf(u) {
   return {name: u.name, phone: u.phone, email: u.email, organization: u.org, address: u.address, gcash: u.gcash};
 }
@@ -835,7 +903,7 @@ function renderLots() {
   }
 }
 function orderLot(id) {
-  if (!me) { toast('Please log in first.'); return; }
+  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
   const l = S.lots.find(x => x.id === id), q = parseInt($('oq' + id).value, 10);
   if (!l) return toast('This listing is no longer available.');
   rpc('placeOrder', me, [{breeder: l.breeder, sp: l.sp, qty: q, lotId: id}])
@@ -897,7 +965,7 @@ function withdraw(id) {
     .catch(e => toast(errText(e)));
 }
 
-// ===== FARM VISITS (visitors) =====
+// ===== FARM VISITS =====
 function initVisits() {
   const sel = $('rFarm'); if (!sel) return;
   const names = allFarmNames();
@@ -942,7 +1010,7 @@ function renderSlots() {
   $('rTotal').textContent = (g * fp(f)).toFixed(2);
 }
 function reserve() {
-  if (!me) { toast('Please log in first (More tab).'); showView('more'); return; }
+  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
   const data = {
     farm: farm(), date: $('rDate').value, n: nVis(), slot: selSlot,
     name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim(),
@@ -997,7 +1065,7 @@ function renderRes() {
   $('resHint').style.display = list.length ? 'none' : 'block';
 }
 
-// ===== FARM OWNER: ORDERS & SEATS (own farm only) =====
+// ===== FARM OWNER: ORDERS & SEATS =====
 function renderFarm() {
   const box = $('vFarm');
   if (!isOwner()) { box.innerHTML = emptyBox('🏡', 'The Orders panel is for farm owners.'); return; }
@@ -1124,7 +1192,7 @@ function sendThread() {
     .catch(e => toast(errText(e)));
 }
 
-// ===== ADMIN: BOOKINGS (all farms, inside More) =====
+// ===== ADMIN: BOOKINGS =====
 function renderOwnerPanel() {
   const box = $('ownerBox'); if (!box || !isAdmin()) return;
   const list = S.reservations.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
@@ -1158,7 +1226,7 @@ function ownerAct(ref, action) {
   }).catch(e => toast(errText(e)));
 }
 
-// ===== FARM PROFILE (breeder: own farm; admin: any farm) =====
+// ===== FARM PROFILE =====
 function farmEditorCard(name, asAdmin) {
   const i = farmInfo(name);
   return `<div class="card"><h3>🏡 Farm profile – ${esc(name)}</h3>
@@ -1185,7 +1253,7 @@ function saveFarmEditor(name, asAdmin) {
     .catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
-// ===== CHANGE PASSWORD (every logged-in user) =====
+// ===== CHANGE PASSWORD =====
 function passwordCard() {
   return `<div class="card"><h3>🔑 Change password</h3>
     <p class="muted">Enter your current password (or the temporary one from your administrator), then choose a new password.</p>
@@ -1209,12 +1277,25 @@ function changeMyPwd() {
   }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
+// ===== LEGAL =====
+function legalCard() {
+  const link = 'display:block;flex:1;text-align:center;padding:10px;border-radius:12px;text-decoration:none;color:var(--p1);font-weight:600;background:#f2eefc';
+  return `<div class="card"><h3>⚖️ Legal</h3>
+    <p class="muted" style="margin-top:-6px">Terms of use, privacy policy, and copyright notice (version 1.0, November 12, 2026).</p>
+    <div class="row">
+      <a style="${link}" href="${LEGAL_URL}" target="_blank" rel="noopener">Terms &amp; Conditions</a>
+      <a style="${link}" href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a>
+    </div>
+    <p class="muted" style="margin:12px 0 0;text-align:center">© 2026 Jerwin M. Montellano / LepVision. All rights reserved.</p>
+  </div>`;
+}
+
 // ===== MORE =====
 function renderMore() {
   const u = me ? myUser() : null;
   let h = '';
   if (!u || !u.role) {
-    h += authCard();
+    h += `<div class="card"><h3>🔐 Log in</h3><p class="muted">Please log in on the Home page first.</p><button class="btn" onclick="showView('home')">Go to log in</button></div>`;
   } else {
     h += `<div class="card"><h3>👤 ${esc(u.name || me)}</h3>
       <p class="muted" style="margin-top:-6px">${esc(ROLE_NAME[u.role] || u.role)} · @${esc(me)}${u.farm ? '<br>🏡 ' + esc(u.farm) : ''}${u.idType ? '<br>🪪 ' + esc(u.idType) : ''}</p>
@@ -1231,11 +1312,9 @@ function renderMore() {
     if (u.mustChange) h += `<div class="alert red">🔐 Your administrator gave you a temporary password. Please set your own password to continue.</div>`;
     h += passwordCard();
 
-    // Breeders: their designated farm
     if (isBreeder() && myFarm()) h += farmEditorCard(myFarm(), false);
     else if (isBreeder()) h += `<div class="card"><h3>🏡 My farm</h3><p class="muted">No farm is designated to your account yet. The administrator will assign one.</p></div>`;
 
-    // Admin only: dashboard link, bookings, users, any farm profile
     if (isAdmin() && dashboardToken) h += `<div class="card"><h3>📊 Admin dashboard</h3>
       <p class="muted">All orders, bookings, users and activity. The link expires after one hour; log in again to refresh.</p>
       <a href="${esc(APPS_SCRIPT_URL)}?page=dashboard&token=${encodeURIComponent(dashboardToken)}" target="_blank" rel="noopener"
@@ -1253,6 +1332,9 @@ function renderMore() {
         <label>Farm<select onchange="adminFarmPick=this.value;renderMore()">${names.map(f => `<option value="${esc(f)}" ${f === adminFarmPick ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
         <p class="muted">To designate a farm to a breeder, open User Management, edit the breeder and choose the farm.</p></div>`;
       if (adminFarmPick) h += farmEditorCard(adminFarmPick, true);
+      h += `<div class="card"><h3>📊 Quality survey results (ISO/IEC 25010)</h3>
+        <button class="ghost" onclick="loadSurveyResults()">Load results</button>
+        <div id="svResults" style="margin-top:12px"></div></div>`;
     }
 
     if (canShopManage()) h += `<div class="card"><h3>🛠 Breeder Tools</h3>
@@ -1264,6 +1346,7 @@ function renderMore() {
     h += aiCard();
     h += `<div class="card"><button class="ghost" style="width:100%" onclick="logout()">Log out</button></div>`;
   }
+  h += legalCard();
   h += `<div class="card"><h3>📝 Audit trail</h3><p class="muted">Your actions are recorded in the Activity sheet.</p></div>`;
   $('vMore').innerHTML = h;
   renderSales();
@@ -1373,7 +1456,7 @@ function createFarmOwner() {
   }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
-// ===== AI CLASSIFICATION: camera, upload, and phone camera app =====
+// ===== AI CLASSIFICATION =====
 function aiCard() {
   return `<div class="card"><h3>🔬 AI Classification</h3>
     <p class="muted">Take a photo with the camera or upload one. The model identifies it and the photo is saved to the matching folder in the Butterfly Dataset on Google Drive.</p>
@@ -1399,8 +1482,6 @@ function aiCard() {
     ${isAdmin() ? `<button class="ghost" style="width:100%;margin-top:8px" onclick="showDatasetStatus()">📁 Check dataset counts</button><div id="dsResult" style="margin-top:10px"></div>` : ''}
   </div>`;
 }
-
-// Opens the live camera preview (works on GitHub Pages and the Android app)
 async function camOpen() {
   camClose();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1418,7 +1499,6 @@ async function camOpen() {
     showAiErr(new Error('The camera is not available (' + (e.name || e.message) + '). Allow camera access, or use "Upload photo".'));
   }
 }
-
 function camCapture() {
   const v = $('camVideo');
   if (!v || !v.videoWidth) { toast('The camera is still starting. Try again in a moment.'); return; }
@@ -1429,13 +1509,10 @@ function camCapture() {
   camClose();
   imageToB64(dataUrl).then(classifyB64).catch(showAiErr);
 }
-
 function camClose() {
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
   const b = $('camBox'); if (b) b.classList.add('hide');
 }
-
-// Upload or phone-camera-app photo
 function classifyPhoto(input) {
   const f = input.files[0]; if (!f) return;
   const reader = new FileReader();
@@ -1443,8 +1520,6 @@ function classifyPhoto(input) {
   reader.readAsDataURL(f);
   input.value = '';
 }
-
-// Resizes any image to a JPEG (max 1024 px) and returns base64 for the server
 function imageToB64(src, maxSide = 1024) {
   return new Promise((ok, no) => {
     const im = new Image();
@@ -1459,8 +1534,6 @@ function imageToB64(src, maxSide = 1024) {
     im.src = src;
   });
 }
-
-// Sends one photo to the server and shows the result
 function classifyB64(b64) {
   const task = $('aiTask').value;
   const msg = $('aiMsg'), out = $('aiResult');
@@ -1474,12 +1547,10 @@ function classifyB64(b64) {
       <a href="${esc(res.folderUrl)}" target="_blank" rel="noopener">Open folder</a></div>`;
   }).catch(showAiErr);
 }
-
 function showAiErr(e) {
   const m = $('aiMsg');
   if (m) { m.className = 'note'; m.textContent = 'Classification failed: ' + errText(e); }
 }
-
 function showDatasetStatus() {
   const box = $('dsResult'); if (!box) return;
   box.innerHTML = '<p class="muted">Loading…</p>';
@@ -1529,12 +1600,10 @@ function boot() {
 
 boot();
 
-// Offline/app shell (GitHub Pages only; not used inside Apps Script)
+// Offline app shell (GitHub Pages only)
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !IN_APPS_SCRIPT) {
   navigator.serviceWorker.register('sw.js');
 }
 </script>
 </body>
 </html>
-
-
