@@ -218,8 +218,8 @@ nav .ic{font-size:1.25rem;line-height:1}
 
 <script>
 // On Apps Script this is the current web app address. On GitHub Pages the fallback address is used.
-const SERVER_URL_FROM_APPS_SCRIPT = '<?= appUrl ?>';
-const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.indexOf('<?') === 0
+const SERVER_URL_FROM_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyb5Mo5oUpcq0Xtmt9TYxn6WbIfJypVYryyS8P8CVO0vHLW-LSaceINk-xv8VFzXXfOew/exec';
+const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.charAt(0) === '<'
   ? 'https://script.google.com/macros/s/AKfycbxkYNiVISuGz8yBEnEWlSJkuAndQAUhsamGZtjt8LEdpzooC_D0WhIXw3CSLSzFPwembQ/exec'
   : SERVER_URL_FROM_APPS_SCRIPT;
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
