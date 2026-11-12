@@ -110,22 +110,19 @@ nav .ic{font-size:1.25rem;line-height:1}
 
   <main class="wrap">
     <section id="vHome">
-      <div id="loginBox"></div>
-      <div id="homeMain">
-        <div class="stats">
-          <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
-          <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
-          <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
-        </div>
-        <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
-        <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
+      <div class="stats">
+        <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
+        <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
+        <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
       </div>
+      <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
+      <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
     </section>
 
     <section id="vMarket" class="hide">
       <div class="card">
         <h3>🛍 Marketplace</h3>
-        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in on the Home page to check out.</p>
+        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in under More to check out.</p>
         <div id="catBar" style="margin-bottom:12px"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -217,16 +214,13 @@ nav .ic{font-size:1.25rem;line-height:1}
 <div id="toast" class="hide"></div>
 
 <script>
-// On Apps Script this is the current web app address. On GitHub Pages the fallback address is used.
-// On Apps Script this is the current web app address. On GitHub Pages the fallback address is used.
+// On Apps Script this resolves to the current web app URL. On GitHub Pages the fallback is used.
 const SERVER_URL_FROM_APPS_SCRIPT = '<?= appUrl ?>';
-const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.charAt(0) === '<'
-  ? 'https://script.google.com/macros/s/AKfycbyb5Mo5oUpcq0Xtmt9TYxn6WbIfJypVYryyS8P8CVO0vHLW-LSaceINk-xv8VFzXXfOew/exec'
+const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.indexOf('<?') === 0
+  ? 'https://script.google.com/macros/s/AKfycbxkYNiVISuGz8yBEnEWlSJkuAndQAUhsamGZtjt8LEdpzooC_D0WhIXw3CSLSzFPwembQ/exec'
   : SERVER_URL_FROM_APPS_SCRIPT;
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
-// GitHub Pages cannot call Apps Script directly (the browser blocks it), so send visitors to the Apps Script address.
-if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname)) location.replace(APPS_SCRIPT_URL);
 
 // ===== DATA =====
 const SPECIES = {
@@ -247,7 +241,7 @@ const QA = [
   'Not yet matured (freshly pupated, within 2 days)'
 ];
 const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
-// Built-in farms. Names must match FARM_DEFAULTS in Code.gs exactly.
+// Built-in farms. Names must match FARM_DEFAULTS in Code_v5.gs exactly.
 const FARMS = {
   'JCM Butterfly Breeding Farm':{loc:'Cawit, Boac, Marinduque',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
   'JCM Butterfly Farm':{loc:'Marinduque',ll:[13.4,121.9],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
@@ -357,7 +351,7 @@ function farmOptions(selected, allowNone) {
     allFarmNames().map(f => `<option value="${esc(f)}" ${f === selected ? 'selected' : ''}>${esc(f)}</option>`).join('');
 }
 
-// One function for every server call. Works inside Apps Script (google.script.run) and on the Android/web wrapper (fetch).
+// One function for every server call. Works inside Apps Script and from GitHub Pages / Android.
 function rpc(fn, ...args) {
   if (IN_APPS_SCRIPT) {
     return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
@@ -452,7 +446,7 @@ function applyNav() {
   $('nVisitsLabel').textContent = isOwner() ? 'Orders' : 'Visits';
 }
 
-// ===== LOGIN / REGISTER (shown on the Home page) =====
+// ===== AUTH =====
 function authCard() {
   return `<div class="card"><h3>🔐 Log in or register</h3>
     <div class="seg"><button id="tabLi" class="on" onclick="showAuth('login')">Log in</button><button id="tabRg" onclick="showAuth('register')">Register</button></div>
@@ -541,15 +535,14 @@ function logout() {
   me = null; cart = {}; manage = false; adminUsers = []; editing = '';
   renderHeader(); applyNav();
   $('vFarm').innerHTML = '';
-  showView('home');
+  showView('more');
   toast('Logged out');
 }
 
 // ===== NAVIGATION =====
 function showView(v) {
   camClose();
-  // Logged-out visitors can only see Home (with the login form) and More (legal section)
-  if (!me && v !== 'home' && v !== 'more' && v !== 'market') { toast('Please log in first.'); v = 'home'; }
+  if (['visits', 'pupae', 'farm'].indexOf(v) > -1 && !me) { toast('Please log in first (More tab).'); v = 'more'; }
   if (me && myUser().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
   if (v === 'visits' && isOwner()) v = 'farm';
   if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
@@ -571,25 +564,15 @@ function showView(v) {
 
 // ===== HOME & ALERTS =====
 function renderHome() {
-  const logged = !!me && !!S.users[me];
-  if (!logged) {
-    // Logged out: show the login / register form first
-    if (!$('loginBox').innerHTML) $('loginBox').innerHTML = authCard();
-    $('homeMain').classList.add('hide');
-    return;
-  }
-  $('loginBox').innerHTML = '';
-  $('homeMain').classList.remove('hide');
-
   const now = Date.now(), u = myUser();
-  const myOrders = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
-  const myBookings = S.reservations.filter(r => r.user === me);
+  const myOrders = S.orders.filter(o => me && (o.buyer === me || o.breeder === me)).sort((a, b) => b.created - a.created);
+  const myBookings = S.reservations.filter(r => me && r.user === me);
   $('stAvail').textContent = S.lots.filter(liveLot).reduce((a, l) => a + l.left, 0);
   $('stOrders').textContent = myOrders.length;
   $('stVisits').textContent = myBookings.length;
 
   let al = '';
-  if (!S.survey.done) {
+  if (me && !S.survey.done) {
     al += `<div class="alert good">📝 Please answer our 2-minute quality survey (ISO/IEC 25010). <button class="ghost" style="margin-left:6px;padding:4px 10px" onclick="openSurvey()">Answer now</button></div>`;
   }
   if (isOwner() || isAdmin()) {
@@ -614,7 +597,7 @@ function renderHome() {
 
 function renderMyDash() {
   const el = $('myDash'); if (!el) return;
-  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in to see your dashboard.'); return; }
+  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in under More to see your dashboard.'); return; }
   const t0 = today();
   const orders = S.orders.filter(o => o.buyer === me || o.breeder === me);
   const bought = orders.filter(o => o.buyer === me && o.status === 'Received');
@@ -755,7 +738,6 @@ function setImg(s, kind, input) {
   reader.readAsDataURL(f);
 }
 function addToCart(b, s, i) {
-  if (!me) { toast('Please log in first to add items.'); showView('home'); return; }
   if (floodedFor(b, s)) return;
   const q = Math.max(1, parseInt($('qty' + i).value, 10) || 1), k = b + '|' + s;
   cart[k] = (cart[k] || 0) + q;
@@ -778,7 +760,7 @@ function renderCart() {
 }
 function toggleCart(open) { $('cart').classList.toggle('hide', !open); }
 function checkout() {
-  if (!me) { toast('Please log in on the Home page to check out.'); toggleCart(false); showView('home'); return; }
+  if (!me) { toast('Please log in first (More tab) to check out.'); toggleCart(false); showView('more'); return; }
   const items = Object.keys(cart).map(k => { const [b, s] = k.split('|'); return {breeder: b, sp: s, qty: cart[k]}; });
   if (!items.length) return toast('Your cart is empty.');
   rpc('placeOrder', me, items)
@@ -904,7 +886,7 @@ function renderLots() {
   }
 }
 function orderLot(id) {
-  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
+  if (!me) { toast('Please log in first.'); return; }
   const l = S.lots.find(x => x.id === id), q = parseInt($('oq' + id).value, 10);
   if (!l) return toast('This listing is no longer available.');
   rpc('placeOrder', me, [{breeder: l.breeder, sp: l.sp, qty: q, lotId: id}])
@@ -1011,7 +993,7 @@ function renderSlots() {
   $('rTotal').textContent = (g * fp(f)).toFixed(2);
 }
 function reserve() {
-  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
+  if (!me) { toast('Please log in first (More tab).'); showView('more'); return; }
   const data = {
     farm: farm(), date: $('rDate').value, n: nVis(), slot: selSlot,
     name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim(),
@@ -1296,7 +1278,7 @@ function renderMore() {
   const u = me ? myUser() : null;
   let h = '';
   if (!u || !u.role) {
-    h += `<div class="card"><h3>🔐 Log in</h3><p class="muted">Please log in on the Home page first.</p><button class="btn" onclick="showView('home')">Go to log in</button></div>`;
+    h += authCard();
   } else {
     h += `<div class="card"><h3>👤 ${esc(u.name || me)}</h3>
       <p class="muted" style="margin-top:-6px">${esc(ROLE_NAME[u.role] || u.role)} · @${esc(me)}${u.farm ? '<br>🏡 ' + esc(u.farm) : ''}${u.idType ? '<br>🪪 ' + esc(u.idType) : ''}</p>
