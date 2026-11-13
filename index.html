@@ -110,19 +110,22 @@ nav .ic{font-size:1.25rem;line-height:1}
 
   <main class="wrap">
     <section id="vHome">
-      <div class="stats">
-        <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
-        <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
-        <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
+      <div id="loginBox"></div>
+      <div id="homeMain">
+        <div class="stats">
+          <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
+          <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
+          <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
+        </div>
+        <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
+        <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
       </div>
-      <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
-      <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
     </section>
 
     <section id="vMarket" class="hide">
       <div class="card">
         <h3>🛍 Marketplace</h3>
-        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in under More to check out.</p>
+        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in on the Home page to check out.</p>
         <div id="catBar" style="margin-bottom:12px"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -214,13 +217,21 @@ nav .ic{font-size:1.25rem;line-height:1}
 <div id="toast" class="hide"></div>
 
 <script>
-// On Apps Script this resolves to the current web app URL. On GitHub Pages the fallback is used.
-const SERVER_URL_FROM_APPS_SCRIPT = '<?= appUrl ?>';
-const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.indexOf('<?') === 0
-  ? 'https://script.google.com/macros/s/AKfycbxkYNiVISuGz8yBEnEWlSJkuAndQAUhsamGZtjt8LEdpzooC_D0WhIXw3CSLSzFPwembQ/exec'
+// Server address.
+// On Apps Script, the template fills in the current /exec address automatically.
+// On GitHub Pages or the Android wrapper, the fallback below is used. Paste the FULL "Web app URL"
+// (ending in /exec) from Deploy > Manage deployments into SERVER_FALLBACK_URL.
+const SERVER_URL_FROM_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbynQy3623dU914XPZnIW7cMmDbq2tHbAI60gL4f-6hIEWKk_H06iav4mm7Et-gulhCH/exec';
+const SERVER_FALLBACK_URL = 'PASTE_YOUR_FULL_EXEC_URL_HERE';
+const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.charAt(0) === '<'
+  ? SERVER_FALLBACK_URL
   : SERVER_URL_FROM_APPS_SCRIPT;
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
+// GitHub Pages cannot call Apps Script directly (the browser blocks it), so send visitors to the Apps Script address.
+if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname) && APPS_SCRIPT_URL.indexOf('PASTE') !== 0) {
+  location.replace(APPS_SCRIPT_URL);
+}
 
 // ===== DATA =====
 const SPECIES = {
@@ -241,7 +252,7 @@ const QA = [
   'Not yet matured (freshly pupated, within 2 days)'
 ];
 const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
-// Built-in farms. Names must match FARM_DEFAULTS in Code_v5.gs exactly.
+// Built-in farms. Names must match FARM_DEFAULTS in Code_v6.gs exactly.
 const FARMS = {
   'JCM Butterfly Breeding Farm':{loc:'Cawit, Boac, Marinduque',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
   'JCM Butterfly Farm':{loc:'Marinduque',ll:[13.4,121.9],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
@@ -351,26 +362,29 @@ function farmOptions(selected, allowNone) {
     allFarmNames().map(f => `<option value="${esc(f)}" ${f === selected ? 'selected' : ''}>${esc(f)}</option>`).join('');
 }
 
-// One function for every server call. Works inside Apps Script and from GitHub Pages / Android.
+// One function for every server call. Works inside Apps Script (google.script.run) and from GitHub Pages / Android (fetch).
 function rpc(fn, ...args) {
   if (IN_APPS_SCRIPT) {
     return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
+  }
+  if (APPS_SCRIPT_URL.indexOf('PASTE') === 0) {
+    return Promise.reject(new Error('The server address is not set in this app. Open the app from its Apps Script /exec link, or paste the full /exec URL into SERVER_FALLBACK_URL.'));
   }
   return fetch(APPS_SCRIPT_URL, {
     method: 'POST', redirect: 'follow',
     headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify({fn: fn, args: args})
   })
-    .then(r => { if (!r.ok) throw new Error('Server returned HTTP ' + r.status + '.'); return r.text(); })
+    .then(r => { if (!r.ok) throw new Error('Server returned HTTP ' + r.status + '. Check the deployment is active and set to Anyone.'); return r.text(); })
     .then(t => {
       let j;
       try { j = JSON.parse(t); }
-      catch (e) { throw new Error('The server sent a sign-in page instead of data. Set the deployment to "Who has access: Anyone" and deploy a new version.'); }
+      catch (e) { throw new Error('The server answered with a web page instead of data. Set the access to Anyone, or the address is an old deployment.'); }
       if (j.error) throw new Error(j.error);
       return j.result;
     })
     .catch(e => {
-      if (e instanceof TypeError) throw new Error('The browser blocked the connection to the server. Open the app from its Apps Script link: ' + APPS_SCRIPT_URL);
+      if (e instanceof TypeError) throw new Error('Cannot reach the server from this browser. Address used: ' + APPS_SCRIPT_URL + '. Open the app from this /exec link in Chrome, then try again.');
       throw e;
     });
 }
@@ -446,7 +460,7 @@ function applyNav() {
   $('nVisitsLabel').textContent = isOwner() ? 'Orders' : 'Visits';
 }
 
-// ===== AUTH =====
+// ===== LOGIN / REGISTER (shown on the Home page) =====
 function authCard() {
   return `<div class="card"><h3>🔐 Log in or register</h3>
     <div class="seg"><button id="tabLi" class="on" onclick="showAuth('login')">Log in</button><button id="tabRg" onclick="showAuth('register')">Register</button></div>
@@ -535,14 +549,15 @@ function logout() {
   me = null; cart = {}; manage = false; adminUsers = []; editing = '';
   renderHeader(); applyNav();
   $('vFarm').innerHTML = '';
-  showView('more');
+  showView('home');
   toast('Logged out');
 }
 
 // ===== NAVIGATION =====
 function showView(v) {
   camClose();
-  if (['visits', 'pupae', 'farm'].indexOf(v) > -1 && !me) { toast('Please log in first (More tab).'); v = 'more'; }
+  // Guests can browse Home (with the login form), Market, and More (legal section). Other screens need a login.
+  if (!me && ['visits', 'pupae', 'farm'].indexOf(v) > -1) { toast('Please log in first.'); v = 'home'; }
   if (me && myUser().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
   if (v === 'visits' && isOwner()) v = 'farm';
   if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
@@ -564,15 +579,25 @@ function showView(v) {
 
 // ===== HOME & ALERTS =====
 function renderHome() {
+  const logged = !!me && !!S.users[me];
+  if (!logged) {
+    // Logged out: the login / register form is the first thing on Home
+    if (!$('loginBox').innerHTML) $('loginBox').innerHTML = authCard();
+    $('homeMain').classList.add('hide');
+    return;
+  }
+  $('loginBox').innerHTML = '';
+  $('homeMain').classList.remove('hide');
+
   const now = Date.now(), u = myUser();
-  const myOrders = S.orders.filter(o => me && (o.buyer === me || o.breeder === me)).sort((a, b) => b.created - a.created);
-  const myBookings = S.reservations.filter(r => me && r.user === me);
+  const myOrders = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
+  const myBookings = S.reservations.filter(r => r.user === me);
   $('stAvail').textContent = S.lots.filter(liveLot).reduce((a, l) => a + l.left, 0);
   $('stOrders').textContent = myOrders.length;
   $('stVisits').textContent = myBookings.length;
 
   let al = '';
-  if (me && !S.survey.done) {
+  if (!S.survey.done) {
     al += `<div class="alert good">📝 Please answer our 2-minute quality survey (ISO/IEC 25010). <button class="ghost" style="margin-left:6px;padding:4px 10px" onclick="openSurvey()">Answer now</button></div>`;
   }
   if (isOwner() || isAdmin()) {
@@ -597,7 +622,7 @@ function renderHome() {
 
 function renderMyDash() {
   const el = $('myDash'); if (!el) return;
-  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in under More to see your dashboard.'); return; }
+  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in to see your dashboard.'); return; }
   const t0 = today();
   const orders = S.orders.filter(o => o.buyer === me || o.breeder === me);
   const bought = orders.filter(o => o.buyer === me && o.status === 'Received');
@@ -700,6 +725,7 @@ function renderMarket() {
         <button class="btn" style="padding:10px" ${d.flooded ? 'disabled' : ''} onclick="addToCart('${esc(b)}','${s}',${i})">${d.flooded ? 'Flooded' : 'Add to cart'}</button></div>
       ${editable ? `<div class="item" style="font-size:.78rem">
         <label>Price (₱)<input type="number" min="0" step="0.5" value="${d.price}" onchange="setCatPrice('${s}',this.value)"></label>
+        <label>Cost per pupa (₱, for profit)<input type="number" min="0" step="0.5" value="${(itemOf(b, s).cost) || 0}" onchange="setCatCost('${s}',this.value)"></label>
         <label><input type="checkbox" style="width:auto" ${d.flooded ? 'checked' : ''} onchange="setCatFlood('${s}',this.checked)"> Flooded (disable buying)</label>
         <label>Butterfly photo<input type="file" accept="image/*" onchange="setImg('${s}','butterfly',this)"></label>
         <label>Pupa photo<input type="file" accept="image/*" onchange="setImg('${s}','pupa',this)"></label>
@@ -711,6 +737,11 @@ function renderMarket() {
 function setCatPrice(s, v) {
   rpc('setCatalogItem', me, s, {price: Math.max(0, parseFloat(v) || 0)})
     .then(() => { toast('Price updated'); loadAll(() => renderAll()); })
+    .catch(e => toast(errText(e)));
+}
+function setCatCost(s, v) {
+  rpc('setCatalogItem', me, s, {cost: Math.max(0, parseFloat(v) || 0)})
+    .then(() => { toast('Cost saved'); loadAll(() => renderAll()); })
     .catch(e => toast(errText(e)));
 }
 function setCatFlood(s, f) {
@@ -738,6 +769,7 @@ function setImg(s, kind, input) {
   reader.readAsDataURL(f);
 }
 function addToCart(b, s, i) {
+  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
   if (floodedFor(b, s)) return;
   const q = Math.max(1, parseInt($('qty' + i).value, 10) || 1), k = b + '|' + s;
   cart[k] = (cart[k] || 0) + q;
@@ -760,7 +792,7 @@ function renderCart() {
 }
 function toggleCart(open) { $('cart').classList.toggle('hide', !open); }
 function checkout() {
-  if (!me) { toast('Please log in first (More tab) to check out.'); toggleCart(false); showView('more'); return; }
+  if (!me) { toast('Please log in on the Home page to check out.'); toggleCart(false); showView('home'); return; }
   const items = Object.keys(cart).map(k => { const [b, s] = k.split('|'); return {breeder: b, sp: s, qty: cart[k]}; });
   if (!items.length) return toast('Your cart is empty.');
   rpc('placeOrder', me, items)
@@ -886,7 +918,7 @@ function renderLots() {
   }
 }
 function orderLot(id) {
-  if (!me) { toast('Please log in first.'); return; }
+  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
   const l = S.lots.find(x => x.id === id), q = parseInt($('oq' + id).value, 10);
   if (!l) return toast('This listing is no longer available.');
   rpc('placeOrder', me, [{breeder: l.breeder, sp: l.sp, qty: q, lotId: id}])
@@ -993,7 +1025,7 @@ function renderSlots() {
   $('rTotal').textContent = (g * fp(f)).toFixed(2);
 }
 function reserve() {
-  if (!me) { toast('Please log in first (More tab).'); showView('more'); return; }
+  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
   const data = {
     farm: farm(), date: $('rDate').value, n: nVis(), slot: selSlot,
     name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim(),
@@ -1260,6 +1292,29 @@ function changeMyPwd() {
   }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
 }
 
+// ===== PROFIT ANALYTICS =====
+function analyticsCard() {
+  return `<div class="card"><h3>📈 Profit analytics</h3>
+    <p class="muted" style="margin-top:-6px">Revenue from completed sales, minus the cost per pupa you enter in Manage prices.</p>
+    <button class="ghost" onclick="loadAnalytics()">Load analytics</button>
+    <div id="anaBox" style="margin-top:12px"></div></div>`;
+}
+function loadAnalytics() {
+  rpc('profitAnalytics', me).then(r => {
+    const s = r.summary;
+    const sum = `<div class="stats">
+      <div class="stat"><b>${money(s.revenue)}</b><span>Revenue</span></div>
+      <div class="stat"><b>${money(s.profit)}</b><span>Profit (margin ${s.margin}%)</span></div>
+      <div class="stat"><b>${s.pupaeSold}</b><span>Pupae sold</span></div></div>
+      <p class="muted">Cost: ${money(s.cost)} · Listed now: ${s.pupaeListed} pupae · Completed orders: ${s.orders}</p>`;
+    const rows = r.species.map(x => `<tr><td>${esc(sp(x.species))}</td><td>${x.sold}</td>
+      <td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.profit)}</td><td>${x.margin}%</td><td>${x.listed}</td></tr>`).join('');
+    $('anaBox').innerHTML = sum + (r.species.length
+      ? `<div class="tw"><table><thead><tr><th>Species</th><th>Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Listed</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      : emptyBox('📊', 'No completed sales yet.'));
+  }).catch(e => toast(errText(e)));
+}
+
 // ===== LEGAL =====
 function legalCard() {
   const link = 'display:block;flex:1;text-align:center;padding:10px;border-radius:12px;text-decoration:none;color:var(--p1);font-weight:600;background:#f2eefc';
@@ -1278,7 +1333,7 @@ function renderMore() {
   const u = me ? myUser() : null;
   let h = '';
   if (!u || !u.role) {
-    h += authCard();
+    h += `<div class="card"><h3>🔐 Log in</h3><p class="muted">Please log in on the Home page first.</p><button class="btn" onclick="showView('home')">Go to log in</button></div>`;
   } else {
     h += `<div class="card"><h3>👤 ${esc(u.name || me)}</h3>
       <p class="muted" style="margin-top:-6px">${esc(ROLE_NAME[u.role] || u.role)} · @${esc(me)}${u.farm ? '<br>🏡 ' + esc(u.farm) : ''}${u.idType ? '<br>🪪 ' + esc(u.idType) : ''}</p>
@@ -1292,6 +1347,7 @@ function renderMore() {
       <p class="note" id="pMsg"></p>
       <button class="btn" onclick="saveProfile()">Save profile</button></div>`;
 
+    if (posts() || isAdmin()) h += analyticsCard();
     if (u.mustChange) h += `<div class="alert red">🔐 Your administrator gave you a temporary password. Please set your own password to continue.</div>`;
     h += passwordCard();
 
@@ -1321,7 +1377,7 @@ function renderMore() {
     }
 
     if (canShopManage()) h += `<div class="card"><h3>🛠 Breeder Tools</h3>
-      <p class="muted" style="margin:0 0 10px">Prices and flood flags are set per species in the Market tab (✏️ Manage prices). Visit prices and seats are set in the farm profile above.</p>
+      <p class="muted" style="margin:0 0 10px">Prices, cost per pupa and flood flags are set per species in the Market tab (✏️ Manage prices). Visit prices and seats are set in the farm profile above.</p>
       <button class="btn" onclick="toggleManage()">${manage ? 'Exit Manage mode' : 'Enter Manage mode'}</button>
       <div id="parkAdmin" class="${manage ? '' : 'hide'}" style="margin-top:12px"></div></div>`;
 
