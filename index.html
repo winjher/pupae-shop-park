@@ -221,15 +221,11 @@ nav .ic{font-size:1.25rem;line-height:1}
 // On Apps Script, the template fills in the current /exec address automatically.
 // On GitHub Pages or the Android wrapper, the fallback below is used. Paste the FULL "Web app URL"
 // (ending in /exec) from Deploy > Manage deployments into SERVER_FALLBACK_URL.
-const SERVER_URL_FROM_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzWC3ajVINPX6yooTRS_DxVylC_0-buL-Ix3lhEbbwhXvs8O92eXN3IhNrUxsJYgZ7ixg/exec';
-const SERVER_FALLBACK_URL = 'PASTE_YOUR_FULL_EXEC_URL_HERE';
-const APPS_SCRIPT_URL = SERVER_URL_FROM_APPS_SCRIPT.charAt(0) === '<'
-  ? SERVER_FALLBACK_URL
-  : SERVER_URL_FROM_APPS_SCRIPT;
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWC3ajVINPX6yooTRS_DxVylC_0-buL-Ix3lhEbbwhXvs8O92eXN3IhNrUxsJYgZ7ixg/exec';
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
-// GitHub Pages cannot call Apps Script directly (the browser blocks it), so send visitors to the Apps Script address.
-if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname) && APPS_SCRIPT_URL.indexOf('PASTE') !== 0) {
+// GitHub Pages cannot call Apps Script directly, so send visitors to the Apps Script address.
+if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname)) {
   location.replace(APPS_SCRIPT_URL);
 }
 
