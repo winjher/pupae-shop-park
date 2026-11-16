@@ -111,6 +111,7 @@ nav .ic{font-size:1.25rem;line-height:1}
   <main class="wrap">
     <section id="vHome">
       <div id="loginBox"></div>
+      <div id="tourBtn"></div>
       <div id="homeMain">
         <div class="stats">
           <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
@@ -221,7 +222,7 @@ nav .ic{font-size:1.25rem;line-height:1}
 // On Apps Script, the template fills in the current /exec address automatically.
 // On GitHub Pages or the Android wrapper, the fallback below is used. Paste the FULL "Web app URL"
 // (ending in /exec) from Deploy > Manage deployments into SERVER_FALLBACK_URL.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyi0_4slSE4fWUa11N77-D9tDuqITWJAa8nathkxtftAdbmNUojreiEgXxLLMMu28Ha1w/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsolNLSd7MfrfRlCRMRr4Nqu5BMZloSwo0fKsi_MsQAo4pV8iwKj_GzZq9-1uflIX8Cg/exec';
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
 const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
 // GitHub Pages cannot call Apps Script directly, so send visitors to the Apps Script address.
@@ -1598,7 +1599,14 @@ function showDatasetStatus() {
     }).join('');
   }).catch(e => { box.innerHTML = '<p class="note">' + esc(errText(e)) + '</p>'; });
 }
-
+function renderTourButton() {
+  const el = $('tourBtn'); if (!el) return;
+  el.innerHTML = `<div class="card" style="text-align:center">
+    <h3>🗺 Plan a Marinduque tour</h3>
+    <p class="muted">Butterfly sanctuary, smart farming, Moriones heritage and beaches. Get an estimate and send your inquiry.</p>
+    <a class="btn" style="display:block;text-decoration:none" href="${APPS_SCRIPT_URL}?page=tour" target="_top">Open tour planner</a>
+  </div>`;
+}
 // ===== POPUP (buyers) =====
 function checkPopup() {
   const u = me && S.users[me];
