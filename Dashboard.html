@@ -30,8 +30,6 @@ th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);white-spac
 th{color:var(--muted);font-weight:600}
 .gate{position:fixed;inset:0;background:linear-gradient(160deg,var(--p1),var(--p2));display:flex;align-items:center;justify-content:center;padding:16px}
 .gate-box{background:#fff;border-radius:22px;padding:24px;width:100%;max-width:360px}
-.gate-box input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;margin:10px 0}
-button{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0;border-radius:10px;padding:11px;width:100%;font:inherit;font-weight:600;cursor:pointer}
 .note{color:var(--bad);min-height:1em;font-size:.85rem}
 .muted{color:var(--muted)}
 .hide{display:none!important}
@@ -43,9 +41,7 @@ button{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0
 <div id="gate" class="gate">
   <div class="gate-box">
     <h2 style="margin:0">🦋 Butterfly Shop Dashboard</h2>
-    <p class="muted">Enter the admin key to continue.</p>
-    <input id="key" type="password" onkeydown="if(event.key==='Enter')unlock()">
-    <button onclick="unlock()">Open dashboard</button>
+    <p class="muted" id="gateText">Checking your admin access…</p>
     <p class="note" id="gMsg"></p>
   </div>
 </div>
@@ -54,7 +50,7 @@ button{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0
   <header class="hdr">
     <div class="hdr-in">
       <div><h1>🦋 Butterfly Shop Dashboard</h1><small>Live · refreshes every 10 s · last update <span id="upd">–</span></small></div>
-      <a href="https://script.google.com/macros/s/AKfycbzquiXhg47SgiUch34ZuJZCAthYLwki3vBfdpqtEWyMzcoTi0Y01TRpBeAD9HOhWgkb2Q/exec">← Back to app</a>
+      <a href="https://script.google.com/macros/s/AKfycbzWC3ajVINPX6yooTRS_DxVylC_0-buL-Ix3lhEbbwhXvs8O92eXN3IhNrUxsJYgZ7ixg/exec">← Back to app</a>
     </div>
   </header>
 
@@ -62,6 +58,9 @@ button{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0
     <div class="stats" id="stats"></div>
 
     <div class="card"><h3>📊 Sales by species (received orders)</h3><div id="bars" class="muted">No sales yet.</div></div>
+
+    <div class="card"><h3>🧾 Sales record (all completed sales)</h3>
+      <div class="tw"><table><thead><tr><th>Date</th><th>Order</th><th>Species</th><th>Qty</th><th>Price</th><th>Total</th><th>Breeder</th><th>Buyer</th></tr></thead><tbody id="tSales"></tbody></table></div></div>
 
     <div class="card"><h3>📦 Inventory – fresh pupae</h3>
       <div class="tw"><table><thead><tr><th>Species</th><th>Breeder</th><th>Qty</th><th>Left</th><th>Price</th><th>Expires</th></tr></thead><tbody id="tInv"></tbody></table></div></div>
@@ -81,35 +80,39 @@ button{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0
 </div>
 
 <script>
+// Token comes from the admin's login (passed in the link). It expires after one hour.
+const TOKEN = '<?= token ?>';
+
 const $ = id => document.getElementById(id);
 const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = n => '₱' + Number(n || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const fmt = s => { const t = new Date(s); return isNaN(t) ? String(s || '') : t.toLocaleString('en-PH', {dateStyle:'medium', timeStyle:'short'}); };
 const sp = s => String(s || '').replace('Butterfly-', '');
 
-let KEY = '', timer = 0;
+let timer = 0;
 
-function unlock() {
-  KEY = $('key').value.trim();
-  if (!KEY) return;
-  $('gMsg').textContent = 'Checking…';
-  refresh(true);
+function showGate(msg) {
+  $('gate').classList.remove('hide');
+  $('dash').classList.add('hide');
+  $('gMsg').textContent = msg;
+  $('gateText').textContent = 'Admin access only.';
+  clearInterval(timer); timer = 0;
 }
 
-function refresh(first) {
+function refresh() {
   google.script.run
     .withSuccessHandler(d => {
       $('gate').classList.add('hide');
       $('dash').classList.remove('hide');
       $('gMsg').textContent = '';
       render(d);
-      if (!timer) timer = setInterval(() => refresh(false), 10000);
+      if (!timer) timer = setInterval(refresh, 10000);
     })
     .withFailureHandler(e => {
-      $('gMsg').textContent = e.message;
-      if (first) $('gate').classList.remove('hide');
+      // Expired or invalid token: stop refreshing and ask the admin to log in again
+      showGate(e.message || 'Could not load the dashboard.');
     })
-    .getDashboardData(KEY);
+    .getDashboardData(TOKEN);
 }
 
 function fill(id, list, empty) {
@@ -139,12 +142,16 @@ function render(d) {
     ? sales.map(([s, q]) => `<div class="bar"><span>${esc(sp(s))}</span><i style="width:${Math.round(q / max * 100)}%"></i><b>${q}</b></div>`).join('')
     : 'No sales yet.';
 
+  fill('tSales', (d.salesRecord || []).map(r => [fmt(r.date), r.id, sp(r.sp), r.qty, money(r.price), money(r.total), r.breeder, r.buyerName]), 'No completed sales yet.');
   fill('tInv', d.inventory.list.map(r => [sp(r[0]), r[1], r[2], r[3], money(r[4]), fmt(r[5])]), 'No listings yet.');
   fill('tOrd', d.orders.list.map(r => [r[0], r[1], sp(r[2]), r[3], money(r[4]), r[5], fmt(r[6])]), 'No orders yet.');
   fill('tRes', d.reservations.list.map(r => [r[0], r[1], r[2], r[3], r[4], r[5], money(r[6]), r[7]]), 'No reservations yet.');
   fill('tUsr', d.users.list.map(r => [r[0], r[1], r[2], r[3], r[4] || '–', fmt(r[5])]), 'No users yet.');
   fill('tAct', d.activity.map(r => [fmt(r[0]), r[1], r[2], r[3], r[4]]), 'No activity yet.');
 }
+
+if (TOKEN) refresh();
+else showGate('Open the dashboard from your admin account.');
 </script>
 </body>
 </html>
