@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plan Your Marinduque Tour</title>
+<style>
+:root{--p1:#5b3fd0;--p2:#9b4fe0;--bg:#f3f0fc;--card:#fff;--text:#1e1b3a;--muted:#7a7599;--line:#e8e3f6;--ok:#10b981;--shadow:0 8px 24px rgba(60,40,120,.08)}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+header{background:linear-gradient(135deg,#4a2fc0,#c05ad8);color:#fff;padding:24px 20px 56px;border-radius:0 0 30px 30px}
+header h1{margin:0 0 6px;font-size:1.5rem}
+header p{margin:0;opacity:.9;font-size:.9rem}
+header a{color:#fff;font-size:.85rem;font-weight:600}
+main{max-width:860px;margin:-36px auto 0;padding:0 14px 40px}
+.card{background:var(--card);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:1.1rem;margin:0 0 12px;color:var(--p1)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.pkg{border:1px solid var(--line);border-radius:16px;padding:16px}
+.pkg h3{margin:0 0 6px;font-size:1rem}
+.pkg p{margin:0;color:var(--muted);font-size:.88rem}
+label{display:block;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:12px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;margin-top:4px}
+.checks{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;font-size:.9rem;color:var(--text)}
+.checks label{display:flex;gap:6px;align-items:center;margin:0;font-weight:600;color:var(--text)}
+.checks input{width:auto;margin:0}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+td{padding:8px 4px;border-bottom:1px solid var(--line)}
+td.r{text-align:right;white-space:nowrap}
+.total{font-size:1.15rem;font-weight:800;color:var(--p1)}
+.btn{display:block;text-align:center;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;text-decoration:none;padding:13px;border-radius:14px;font-weight:700;margin-top:14px}
+.btn.off{opacity:.5;pointer-events:none}
+.muted{color:var(--muted);font-size:.85rem}
+.note{background:#fff8e6;border-left:4px solid #f59e0b;padding:10px 12px;border-radius:10px;font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="https://script.google.com/macros/s/AKfycbzWC3ajVINPX6yooTRS_DxVylC_0-buL-Ix3lhEbbwhXvs8O92eXN3IhNrUxsJYgZ7ixg/exec">← Back to the app</a>
+  <h1>🦋 Plan Your Marinduque Tour</h1>
+  <p>Butterflies, smart farming, Moriones heritage and beaches. Tell us about your group and we will send a tailored itinerary.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Tour packages</h2>
+    <div class="grid">
+      <div class="pkg"><h3>🦋 Butterfly sanctuary</h3><p>Visit the breeding farms, learn the lifecycle from egg to adult, and join a hands-on workshop.</p></div>
+      <div class="pkg"><h3>🌱 Smart farming eco-tour</h3><p>See sustainable farming methods and how local communities protect the land and water.</p></div>
+      <div class="pkg"><h3>🎭 Moriones heritage trail</h3><p>Explore Marinduque's Holy Week tradition, the Moriones masks, and local history with a guide.</p></div>
+      <div class="pkg"><h3>🏖 Beach getaway</h3><p>Relax on the island's coast, with time for swimming, snorkeling, and seaside meals.</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Quick estimate</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+      <label>Group size<input type="number" id="pax" min="1" max="49" value="4" oninput="calc()"></label>
+      <label>Number of days<input type="number" id="days" min="1" max="30" value="2" oninput="calc()"></label>
+      <label>Pickup<select id="pickup" onchange="calc()">
+        <option>Balanacan Port</option><option>Mogpog</option><option>Marinduque Airport (Gasan)</option><option>Hotel</option><option>Residence</option><option>Other</option>
+      </select></label>
+    </div>
+    <p class="muted" style="margin:0 0 6px">Choose the packages you want:</p>
+    <div class="checks" id="interests">
+      <label><input type="checkbox" value="butterfly" checked onchange="calc()"> Butterfly sanctuary</label>
+      <label><input type="checkbox" value="farming" onchange="calc()"> Smart farming eco-tour</label>
+      <label><input type="checkbox" value="moriones" onchange="calc()"> Moriones heritage trail</label>
+      <label><input type="checkbox" value="beach" onchange="calc()"> Beach getaway</label>
+    </div>
+    <table id="lines"></table>
+    <p style="display:flex;justify-content:space-between;margin:12px 0 0"><span>Indicative total</span><span class="total" id="total">₱0</span></p>
+    <p class="note">This is an indicative estimate only. Your consultant will confirm the final price, which may change with dates, vehicle and inclusions.</p>
+    <a id="ctaBtn" class="btn" href="<?= formUrl ?>" target="_blank" rel="noopener">Send my tour inquiry</a>
+  </section>
+</main>
+
+<script>
+// Keep these rates in step with the Rates and Fleet tabs in the tour spreadsheet (tour.gs).
+const RATES = {guide: 2500, permits: 150, butterfly: 500, farming: 400, moriones: 350, beach: 300};
+const FLEET = [
+  {name: 'Luxury MPV', min: 1, max: 5, daily: 9000},
+  {name: 'Spacious Van', min: 6, max: 12, daily: 6000},
+  {name: 'Compact Bus / Coaster', min: 13, max: 25, daily: 9500},
+  {name: 'Full-Size Coach', min: 26, max: 49, daily: 15000}
+];
+const FORM_URL = '<?= formUrl ?>';
+
+function peso(n) { return '₱' + Math.round(n).toLocaleString('en-PH'); }
+
+function vehicleFor(pax) {
+  const fit = FLEET.find(v => pax >= v.min && pax <= v.max);
+  if (fit) return {label: fit.name, daily: fit.daily};
+  const big = FLEET[FLEET.length - 1], n = Math.ceil(pax / big.max);
+  return {label: n + ' x ' + big.name, daily: big.daily * n};
+}
+
+function calc() {
+  const pax = Math.max(1, parseInt(document.getElementById('pax').value, 10) || 1);
+  const days = Math.max(1, parseInt(document.getElementById('days').value, 10) || 1);
+  const veh = vehicleFor(pax);
+  const rows = [
+    ['Private transfer: ' + veh.label + ' × ' + days + ' day(s)', veh.daily * days],
+    ['Local guide × ' + days + ' day(s)', RATES.guide * days],
+    ['Permits and fees (' + pax + ' pax)', RATES.permits * pax]
+  ];
+  const names = {butterfly: 'Butterfly sanctuary', farming: 'Smart farming eco-tour', moriones: 'Moriones heritage trail', beach: 'Beach getaway'};
+  document.querySelectorAll('#interests input:checked').forEach(c => {
+    rows.push([names[c.value] + ' (' + pax + ' pax)', RATES[c.value] * pax]);
+  });
+  const total = rows.reduce((s, r) => s + r[1], 0);
+  const table = document.getElementById('lines');
+  table.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const a = document.createElement('td'); a.textContent = r[0];
+    const b = document.createElement('td'); b.className = 'r'; b.textContent = peso(r[1]);
+    tr.appendChild(a); tr.appendChild(b); table.appendChild(tr);
+  });
+  document.getElementById('total').textContent = peso(total);
+}
+
+// Enable the inquiry button only when the form link has been set in the app's Config sheet
+(function () {
+  const btn = document.getElementById('ctaBtn');
+  if (!FORM_URL) { btn.classList.add('off'); btn.removeAttribute('href'); btn.textContent = 'Inquiry form not set up yet'; }
+})();
+calc();
+</script>
+</body>
+</html>
