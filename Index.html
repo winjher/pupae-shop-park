@@ -6,1556 +6,1298 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#5b3fd0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<title>Butterfly Pupae Shop & Park</title>
+<title>LepVision Butterfly Marketplace</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--p1:#5b3fd0;--p2:#9b4fe0;--pink:#ec4899;--bg:#f3f0fc;--card:#fff;--text:#1e1b3a;--muted:#7a7599;--line:#e8e3f6;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;--info:#6366f1;--shadow:0 8px 24px rgba(60,40,120,.08)}
+:root{
+  --b1:#5b3fd0;--b2:#9b4fe0;--pk:#ec4899;
+  --bg:#f5f3fb;--sf:#ffffff;--ink:#1d1a33;--ink2:#5d5878;--mut:#8b87a6;--ln:#ebe7f5;
+  --ok:#047857;--okbg:#d1fae5;--wr:#b45309;--wrbg:#fef3c7;--bad:#b91c1c;--badbg:#fee2e2;
+  --inf:#4338ca;--infbg:#e0e7ff;--r:18px;
+  --sh:0 1px 2px rgba(30,20,70,.05),0 10px 30px rgba(60,40,120,.08);
+}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));-webkit-font-smoothing:antialiased}
-button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:9px 14px;background:#fff;color:var(--p1);font-weight:600;transition:transform .1s,filter .15s,background .15s}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.hide{display:none!important}
+.app{max-width:980px;margin:0 auto}
+.muted{color:var(--mut);font-size:.84rem}
+.note{color:var(--bad);font-size:.86rem;min-height:1.2em;margin:6px 0}
+.ok{color:var(--ok);font-size:.86rem;font-weight:600;margin:6px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1}
+.h4{font-weight:800;margin:16px 0 8px;font-size:.92rem;color:var(--b1)}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,#4a2fc0 0%,#7b3fe4 55%,#c05ad8 100%);padding:calc(18px + env(safe-area-inset-top,0px)) 20px 74px;border-radius:0 0 34px 34px}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.08);pointer-events:none}
+.hero:before{width:260px;height:260px;right:-80px;top:-110px}
+.hero:after{width:180px;height:180px;left:-60px;bottom:-110px}
+.hero-in{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hero small{opacity:.85;font-size:.8rem;font-weight:600}
+.hero h1{margin:2px 0 0;font-size:1.45rem;font-weight:800;letter-spacing:-.3px}
+.pill{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;font-size:.74rem;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#6ee7b7;animation:pulse 2s infinite}
+.pill.off .dot{background:#fca5a5;animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(110,231,183,0)}100%{box-shadow:0 0 0 0 rgba(110,231,183,0)}}
+.iconbtn{background:rgba(255,255,255,.2);color:#fff;border-radius:14px;padding:9px 14px;font-weight:700;box-shadow:none}
+.iconbtn:hover{background:rgba(255,255,255,.3)}
+.iconbtn.dark{background:#f1edfc;color:var(--b1)}
+
+/* ---------- LAYOUT ---------- */
+.main{padding:0 14px;margin-top:-46px;position:relative;z-index:2}
+.card{background:var(--sf);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin-bottom:16px;border:1px solid rgba(255,255,255,.7)}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.card-h h3{margin:0;font-size:1.02rem;font-weight:800;letter-spacing:-.1px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--sf);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:var(--sh);border-top:3px solid var(--b2)}
+.stat:nth-child(2){border-top-color:var(--pk)}
+.stat:nth-child(3){border-top-color:var(--ok)}
+.stat b{display:block;font-size:1.35rem;font-weight:800}
+.stat span{font-size:.72rem;color:var(--mut);font-weight:700}
+.qa{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.qbtn{background:#f7f5fd;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:.8rem}
+.qbtn span{font-size:1.4rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{color:var(--mut);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px}
+.li{padding:12px 0;border-bottom:1px solid var(--ln);font-size:.9rem}
+.li:last-child{border-bottom:0}
+.empty{text-align:center;padding:26px 12px;color:var(--mut);font-size:.9rem}
+.empty i{font-style:normal;font-size:2.2rem;display:block;margin-bottom:6px}
+
+/* ---------- FORM CONTROLS ---------- */
+button{font:inherit;border:0;cursor:pointer;border-radius:12px;padding:10px 16px;font-weight:700;background:#f1edfc;color:var(--b1);transition:transform .08s,filter .15s,background .15s}
+button:hover{filter:brightness(1.03)}
 button:active{transform:scale(.97)}
 button:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;width:100%;padding:12px;box-shadow:0 6px 16px rgba(91,63,208,.25)}
-.btn:hover{filter:brightness(1.06)}
-.ghost{background:#f2eefc;color:var(--p1)}
-.ghost:hover{background:#e8e0fb}
-input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff;margin-top:4px;transition:border-color .15s,box-shadow .15s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(155,79,224,.18)}
-label{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.2px}
-.hero{background:linear-gradient(135deg,#4a2fc0 0%,#7b3fe4 55%,#c05ad8 100%);color:#fff;padding:22px 20px 62px;border-radius:0 0 32px 32px;position:relative;overflow:hidden}
-.hero::after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
-.hero::before{content:"";position:absolute;left:-40px;bottom:-80px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06)}
-.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:relative;z-index:1}
-.hero small{opacity:.85;font-size:.8rem}
-.hero h1{margin:2px 0 0;font-size:1.4rem;font-weight:800;letter-spacing:-.2px}
-.cartbtn{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px);box-shadow:none;font-size:1rem}
-.cartbtn:hover{background:rgba(255,255,255,.28)}
-.live{display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:rgba(255,255,255,.16);padding:5px 11px;border-radius:999px;font-size:.72rem;position:relative;z-index:1}
-.dot{width:8px;height:8px;border-radius:50%;background:#34d399;animation:pulse 1.8s infinite}
-.live.off .dot{background:#fca5a5;animation:none}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.7)}70%{box-shadow:0 0 0 8px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
-.wrap{padding:0 14px;margin-top:-42px;max-width:920px;margin-left:auto;margin-right:auto;position:relative;z-index:2}
-.card{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid rgba(255,255,255,.6)}
-.card h3{margin:0 0 12px;font-size:1.02rem;font-weight:800;letter-spacing:-.1px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.stat{background:var(--card);border-radius:18px;padding:14px 10px;box-shadow:var(--shadow);text-align:center;border-top:3px solid var(--p2)}
-.stat:nth-child(2){border-top-color:var(--pink)}
-.stat:nth-child(3){border-top-color:var(--ok)}
-.stat b{display:block;font-size:1.4rem;color:var(--text);font-weight:800}
-.stat span{font-size:.72rem;color:var(--muted);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-.sp{background:#fff;border-radius:18px;padding:14px;box-shadow:0 4px 14px rgba(60,40,120,.07);display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);transition:transform .2s,box-shadow .2s}
-.sp:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(60,40,120,.14)}
-.sp.flooded{opacity:.6}
-.imgs{display:flex;justify-content:space-around;font-size:.68rem;color:var(--muted);text-align:center;font-weight:600;background:#faf8ff;border-radius:14px;padding:8px 4px}
-.imgs img{width:64px;height:64px;object-fit:cover;border-radius:12px}
-.price{font-weight:800;color:var(--p1);font-size:1rem}
-.badge{display:inline-block;font-size:.62rem;padding:3px 8px;border-radius:999px;background:var(--bad);color:#fff;margin-left:6px;vertical-align:middle;font-weight:700;letter-spacing:.3px}
-.badge.g{background:var(--ok)}
+.btn{background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff;box-shadow:0 6px 16px rgba(91,63,208,.25)}
+.btn.block{width:100%;padding:13px;display:block}
+.btn.sm,.ghost.sm{padding:7px 12px;font-size:.8rem}
+.ghost{background:#f1edfc;color:var(--b1)}
+.ghost.danger{background:var(--badbg);color:var(--bad)}
+.btn.sm{box-shadow:none}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--ln);border-radius:12px;background:#fff;color:var(--ink);margin-top:5px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--b2);box-shadow:0 0 0 3px rgba(155,79,224,.18)}
+input[type=checkbox],input[type=radio]{width:auto;margin:3px 0 0}
+label.f{display:block;font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:12px;letter-spacing:.2px}
+label.cb{display:flex;gap:9px;align-items:flex-start;font-weight:600;color:var(--ink);font-size:.9rem;margin-bottom:8px}
+.seg{display:flex;background:#f1edfc;border-radius:14px;padding:4px;margin-bottom:14px;gap:4px}
+.seg button{flex:1;background:none;color:var(--mut);box-shadow:none;padding:9px}
+.seg button.on{background:#fff;color:var(--b1);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 14px}
+.slot{background:#fff;color:var(--ink);border:1px solid var(--ln);text-align:left;padding:10px 12px;font-size:.82rem}
+.slot.on{background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff;border-color:transparent}
+.slot:disabled{background:#faf9fd;color:#b9b4cc}
+
+/* ---------- BADGES & ALERTS ---------- */
 .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;background:#eef0f5;color:#4b5563;white-space:nowrap}
-.chip.ok{background:#dcfce7;color:#166534}
-.chip.warn{background:#fef3c7;color:#92400e}
-.chip.info{background:#e0e7ff;color:#3730a3}
-.chip.bad{background:#fee2e2;color:#991b1b}
-.alert{border-left:4px solid var(--warn);background:#fffaf0;padding:11px 13px;border-radius:12px;margin-bottom:9px;font-size:.86rem}
-.alert.red{border-color:var(--bad);background:#fff5f5}
-.alert.good{border-color:var(--ok);background:#f0fdf7}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.note{color:var(--bad);font-size:.85rem;min-height:1em}
-.ok{color:var(--ok)}
-.muted{color:var(--muted);font-size:.82rem}
-.empty{text-align:center;padding:20px 10px;color:var(--muted);font-size:.88rem}
-.empty div{font-size:2.2rem;margin-bottom:4px}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
-th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.3px}
-.tw{overflow-x:auto}
-.item{border-bottom:1px solid var(--line);padding:12px 0;font-size:.88rem}
-.item:last-child{border-bottom:0}
-.thread{max-height:50vh;overflow-y:auto;background:#faf8ff;border-radius:14px;padding:10px}
-.msg{background:#fff;border-radius:12px;padding:8px 10px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
-.msg small{color:var(--muted)}
-nav{position:fixed;bottom:12px;left:12px;right:12px;margin:0 auto;max-width:560px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:24px;display:flex;justify-content:space-around;padding:7px 6px;box-shadow:0 14px 34px rgba(60,40,120,.2);z-index:50;border:1px solid rgba(255,255,255,.7)}
-nav button{background:none;color:var(--muted);flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;font-size:.66rem;font-weight:700;border-radius:16px;box-shadow:none}
-nav button:hover{background:none}
-nav button.on{color:var(--p1);background:#f0ebfd}
-nav .ic{font-size:1.25rem;line-height:1}
-.hide{display:none!important}
-.seg{display:flex;background:#f2eefc;border-radius:14px;padding:4px;margin-bottom:14px}
-.seg button{flex:1;background:none;color:var(--muted);box-shadow:none}
-.seg button.on{background:#fff;color:var(--p1);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.warn{background:var(--wrbg);color:var(--wr)}
+.chip.info{background:var(--infbg);color:var(--inf)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.badge{display:inline-block;font-size:.6rem;padding:3px 8px;border-radius:999px;background:var(--bad);color:#fff;font-weight:800;letter-spacing:.4px}
+.badge.g{background:var(--ok)}
+.alert{border-left:4px solid var(--wr);background:#fffbeb;padding:11px 13px;border-radius:12px;margin-bottom:9px;font-size:.88rem}
+.alert.bad{border-color:var(--bad);background:#fff5f5}
+.alert.ok{border-color:var(--ok);background:#f0fdf7}
+.alert.info{border-color:var(--b2);background:#f7f4ff}
+
+/* ---------- SPECIES GRID ---------- */
+.species{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
+.sp{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 8px rgba(60,40,120,.05);transition:transform .2s,box-shadow .2s}
+.sp:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.sp.flood{opacity:.6}
+.art{display:flex;justify-content:space-around;align-items:center;background:linear-gradient(180deg,#faf8ff,#f2eefc);border-radius:14px;padding:8px 4px}
+.art img{width:60px;height:60px;object-fit:cover;border-radius:12px}
+.art figure{margin:0;text-align:center;font-size:.66rem;color:var(--mut);font-weight:700}
+.price{font-weight:800;color:var(--b1);font-size:1.02rem}
+.edit-box{background:#faf8ff;border-radius:14px;padding:10px 10px 2px;border:1px dashed #d9d0f5}
+.edit-box label.f{margin-bottom:10px;font-size:.72rem}
+
+/* ---------- NAV & SHEETS ---------- */
+.nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:24px;padding:6px;box-shadow:0 14px 34px rgba(60,40,120,.2);z-index:50;border:1px solid rgba(255,255,255,.8)}
+.nav button{flex:1;background:none;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;font-size:.68rem;font-weight:700;border-radius:16px;box-shadow:none}
+.nav button .ic{font-size:1.2rem;line-height:1.1}
+.nav button.on{color:var(--b1);background:#f0ebfd}
 .modal{position:fixed;inset:0;background:rgba(20,10,50,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:200}
-.sheet{background:#fff;border-radius:26px 26px 0 0;padding:20px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
-.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
-.slot{background:#fff;border:1px solid var(--line);color:var(--text);font-weight:600;font-size:.8rem;text-align:left;padding:10px}
-.slot.sel{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border-color:transparent}
-.slot:disabled{background:#f7f5fc;color:#b5b0c9}
-#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1e1b3a;color:#fff;padding:11px 18px;border-radius:14px;z-index:300;font-size:.85rem;max-width:92%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.sheet{background:#fff;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;border-radius:26px 26px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheet-h h3{margin:0;font-size:1.1rem;font-weight:800}
+.thread{max-height:46vh;overflow-y:auto;background:#faf8ff;border-radius:14px;padding:10px}
+.msg{background:#fff;border-radius:12px;padding:9px 11px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.msg small{color:var(--mut)}
+#toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#1d1a33;color:#fff;padding:11px 18px;border-radius:14px;z-index:300;font-size:.86rem;max-width:92%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:opacity .2s}
+@media(min-width:700px){
+  .nav{left:50%;right:auto;width:600px;margin-left:-300px}
+  .modal{align-items:center}
+  .sheet{border-radius:26px}
+}
 </style>
 </head>
 <body>
 
-<!-- ===== APP ===== -->
-<div id="app" class="hide">
+<div class="app">
   <header class="hero">
-    <div class="hero-top">
-      <div><small id="greet">Welcome</small><h1 id="title">🦋 Butterfly Shop</h1></div>
-      <button class="cartbtn" onclick="toggleCart(true)">🛒 <span id="cartCount">0</span></button>
+    <div class="hero-in">
+      <div><small id="hGreet">Welcome</small><h1 id="hTitle">LepVision</h1></div>
+      <button class="iconbtn hide" id="cartBtn" data-act="openCart">🛒 <span id="cartN">0</span></button>
     </div>
-    <div class="live" id="live"><span class="dot"></span><span id="liveTxt">Connecting…</span></div>
+    <div class="pill" id="pill"><span class="dot"></span><span id="pillT">Connecting…</span></div>
   </header>
 
-  <main class="wrap">
-    <section id="vHome">
-      <div id="loginBox"></div>
-      <div id="homeMain">
-        <div class="stats">
-          <div class="stat"><b id="stAvail">0</b><span>Pupae for sale</span></div>
-          <div class="stat"><b id="stOrders">0</b><span>My orders</span></div>
-          <div class="stat"><b id="stVisits">0</b><span>My visits</span></div>
-        </div>
-        <div class="card"><h3>⚠️ Active Alerts</h3><div id="alerts"></div></div>
-        <div class="card"><h3>📊 My Dashboard</h3><div id="myDash"></div></div>
-      </div>
-    </section>
-
-    <section id="vMarket" class="hide">
-      <div class="card">
-        <h3>🛍 Marketplace</h3>
-        <p class="muted">Choose a breeder catalog, then a species and quantity. Log in on the Home page to check out.</p>
-        <div id="catBar" style="margin-bottom:12px"></div>
-        <div class="grid" id="grid"></div>
-      </div>
-    </section>
-
-    <section id="vPupae" class="hide"></section>
-
-    <section id="vVisits" class="hide">
-      <div class="card">
-        <h3>🎫 Request a Farm Visit</h3>
-        <p class="muted" style="margin-top:-6px">Seats are checked automatically. If available, the farm owner approves your request.</p>
-        <label>Farm<select id="rFarm" onchange="farmChanged()"></select></label>
-        <div id="farmInfo" class="muted" style="margin:6px 0 14px"></div>
-        <label>Visit date<input type="date" id="rDate" onchange="renderSlots()"></label>
-        <label>Number of visitors<input type="number" min="1" value="1" id="rN" oninput="renderSlots()"></label>
-        <label>Purpose<select id="rPurpose"><option>Educational Tour</option><option>Photography</option><option>Research</option><option>School Field Trip</option><option>Family Outing</option><option>Other</option></select></label>
-        <div class="slots" id="slots"></div>
-        <label>Contact name<input id="rName"></label>
-        <label>Phone number<input id="rPhone" type="tel"></label>
-        <label>Email<input id="rEmail" type="email"></label>
-        <label>Special requests<input id="rNotes"></label>
-        <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="rTerms" style="width:auto;margin:0"> I agree to the terms and conditions</label>
-        <p>Total: <b>₱<span id="rTotal">0.00</span></b> <span id="rMsg" class="note"></span></p>
-        <button class="btn" onclick="reserve()">Send Request</button>
-      </div>
-      <div class="card hide" id="payBox"></div>
-      <div class="card">
-        <h3>📋 My Bookings</h3>
-        <div class="tw"><table id="resTable"><thead><tr><th>Ref</th><th>Farm</th><th>Date</th><th>Slot</th><th>Pax</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
-        <p class="muted" id="resHint">No bookings on your account yet.</p>
-      </div>
-    </section>
-
-    <section id="vFarm" class="hide"></section>
-
-    <section id="vMore" class="hide"></section>
+  <main class="main">
+    <section id="vHome" data-view="home" class="hide"></section>
+    <section id="vMarket" data-view="market" class="hide"></section>
+    <section id="vPupae" data-view="pupae" class="hide"></section>
+    <section id="vVisits" data-view="visits" class="hide"></section>
+    <section id="vBookings" data-view="bookings" class="hide"></section>
+    <section id="vMore" data-view="more" class="hide"></section>
   </main>
 </div>
 
-<nav id="nav" class="hide">
-  <button id="nHome" class="on" onclick="showView('home')"><span class="ic">🏠</span>Home</button>
-  <button id="nMarket" onclick="showView('market')"><span class="ic">🛍</span>Market</button>
-  <button id="nPupae" class="hide" onclick="showView('pupae')"><span class="ic">🐛</span>Pupae</button>
-  <button id="nVisits" class="hide" onclick="showView('visits')"><span class="ic" id="nVisitsIc">🎫</span><span id="nVisitsLabel">Visits</span></button>
-  <button id="nMore" onclick="showView('more')"><span class="ic">☰</span>More</button>
-</nav>
+<nav class="nav hide" id="nav"></nav>
 
-<!-- CART -->
-<div id="cart" class="modal hide" onclick="if(event.target===this)toggleCart(false)">
+<div id="sheet" class="modal hide" onclick="if(event.target===this)closeSheet()">
   <div class="sheet">
-    <div class="row" style="justify-content:space-between"><h2 style="margin:0;font-size:1.2rem">🛒 Your Cart</h2><button class="ghost" onclick="toggleCart(false)">✕</button></div>
-    <div id="cartItems" style="margin:14px 0"></div>
-    <div style="font-size:1.05rem"><b>Total: ₱<span id="cartTotal">0.00</span></b></div>
-    <button id="checkoutBtn" class="btn" style="margin-top:14px" onclick="checkout()">Checkout</button>
-  </div>
-</div>
-
-<!-- FRESH PUPAE POPUP (buyers) -->
-<div id="popup" class="modal hide">
-  <div class="sheet">
-    <h2 style="margin-top:0">🦋 Fresh pupae available!</h2>
-    <div id="popList"></div>
-    <p class="muted">Fresh pupae can only be sold for 2 days. Once they mature they can no longer be sold.</p>
-    <div class="row"><button class="btn" style="flex:1" onclick="closePopup(true)">View &amp; Buy</button><button class="ghost" style="flex:1" onclick="closePopup(false)">Later</button></div>
-  </div>
-</div>
-
-<!-- BOOKING MESSAGES -->
-<div id="thread" class="modal hide" onclick="if(event.target===this)closeThread()">
-  <div class="sheet">
-    <div class="row" style="justify-content:space-between"><h3 id="thTitle" style="margin:0">Messages</h3><button class="ghost" onclick="closeThread()">✕</button></div>
-    <div class="thread" id="thList" style="margin-top:12px"></div>
-    <div class="row" style="margin-top:10px"><input id="thText" placeholder="Type a message…" style="flex:1;margin:0" onkeydown="if(event.key==='Enter')sendThread()"><button class="btn" style="width:auto" onclick="sendThread()">Send</button></div>
-  </div>
-</div>
-
-<!-- QUALITY SURVEY (ISO/IEC 25010) -->
-<div id="survey" class="modal hide" onclick="if(event.target===this)closeSurvey()">
-  <div class="sheet">
-    <div class="row" style="justify-content:space-between"><h3 style="margin:0">📝 Quick quality survey</h3><button class="ghost" onclick="closeSurvey()">✕</button></div>
-    <p class="muted">Based on the ISO/IEC 25010 software quality model. Takes about 2 minutes. Rate each statement from 1 (strongly disagree) to 5 (strongly agree). You only need to answer once.</p>
-    <div id="svBody"></div>
-    <label style="margin-top:12px">Comments (optional)<textarea id="svComment" rows="3"></textarea></label>
-    <p class="note" id="svMsg"></p>
-    <button class="btn" onclick="submitSurveyForm()">Submit survey</button>
+    <div class="sheet-h"><h3 id="shT"></h3><button class="iconbtn dark" data-act="closeSheet">✕</button></div>
+    <div id="shB"></div>
   </div>
 </div>
 
 <div id="toast" class="hide"></div>
 
 <script>
-// Server address.
-// On Apps Script, the template fills in the current /exec address automatically.
-// On GitHub Pages or the Android wrapper, the fallback below is used. Paste the FULL "Web app URL"
-// (ending in /exec) from Deploy > Manage deployments into SERVER_FALLBACK_URL.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyi0_4slSE4fWUa11N77-D9tDuqITWJAa8nathkxtftAdbmNUojreiEgXxLLMMu28Ha1w/exec';
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const IN_APPS_SCRIPT = !!(window.google && window.google.script && window.google.script.run);
+const SERVER_FALLBACK_URL = 'https://script.google.com/macros/s/AKfycbzX7PPf85oIci5FhrWlDPdV3Ka_4y9bs2kNjKMZLKgrFUDsNEgxvjLQCbC66gc7a_CsWA/exec';
+const APPS_SCRIPT_URL = (function () {
+  const tpl = '<?= ScriptApp.getService().getUrl() ?>';
+  if (tpl && tpl.indexOf('https://') === 0) return tpl;
+  if (IN_APPS_SCRIPT && location.href.indexOf('/exec') > -1) return location.href.split('?')[0];
+  return SERVER_FALLBACK_URL;
+})();
 const LEGAL_URL = APPS_SCRIPT_URL + '?page=legal';
-const IN_APPS_SCRIPT = typeof google !== 'undefined' && !!(google && google.script && google.script.run);
-// GitHub Pages cannot call Apps Script directly, so send visitors to the Apps Script address.
-if (!IN_APPS_SCRIPT && /github\.io$/i.test(location.hostname)) {
-  location.replace(APPS_SCRIPT_URL);
-}
+const TOUR_URL = APPS_SCRIPT_URL + '?page=tour';
 
-// ===== DATA =====
+/* =====================================================================
+   STATIC DATA (must match Code.gs)
+   ===================================================================== */
 const SPECIES = {
-  'Butterfly-Batwing':['#7b2d26','#e8b04a'],'Butterfly-Clippers':['#8a6d3b','#f2e3b3'],
-  'Butterfly-Common Jay':['#2b2b2b','#6fd3c6'],'Butterfly-Common Lime':['#7a6a3a','#e7d85a'],
-  'Butterfly-Common Mime':['#222','#fff'],'Butterfly-Common Mormon':['#222','#fff'],
-  'Butterfly-Emerald Swallowtail':['#1b3a2a','#3ddc84'],'Butterfly-Giant Silk Moth':['#8b5a2b','#e3b778'],
-  'Butterfly-Golden Birdwing':['#111','#f5c518'],'Butterfly-Great Eggfly':['#2a2a55','#fff'],
-  'Butterfly-Great Yellow Mormon':['#222','#f4e04d'],'Butterfly-Grey Glassy Tiger':['#444','#bcd4dc'],
-  'Butterfly-Paper Kite':['#111','#fff'],'Butterfly-Pink Rose':['#222','#e84a7f'],
-  'Butterfly-Plain Tiger':['#c8641e','#f1a24a'],'Butterfly-Red Lacewing':['#7a1010','#e53935'],
-  'Butterfly-Scarlet Mormon':['#111','#d62020'],'Butterfly-Tailed Jay':['#1f2a1f','#9be37f']
+  'Butterfly-Batwing':['#2b2b2b','#e9e4d0'],
+  'Butterfly-Clippers':['#8a6d3b','#f2e3b3'],
+  'Butterfly-Common Jay':['#2b2b2b','#6fd3c6'],
+  'Butterfly-Common Lime':['#7a6a3a','#e7d85a'],
+  'Butterfly-Common Mime':['#222','#fff'],
+  'Butterfly-Common Mormon':['#222','#fff'],
+  'Butterfly-Emerald Swallowtail':['#1b3a2a','#3ddc84'],
+  'Butterfly-Giant Silk Moth':['#6b4f2a','#d9b77a'],
+  'Butterfly-Golden Birdwing':['#111','#f5c518'],
+  'Butterfly-Great Eggfly':['#2a2a55','#fff'],
+  'Butterfly-Great Yellow Mormon':['#222','#f4e04d'],
+  'Butterfly-Grey Glassy Tiger':['#444','#bcd4dc'],
+  'Butterfly-Paper Kite':['#111','#fff'],
+  'Butterfly-Pink Rose':['#222','#e84a7f'],
+  'Butterfly-Plain Tiger':['#c8641e','#f1a24a'],
+  'Butterfly-Red Lacewing':['#7a1010','#e53935'],
+  'Butterfly-Scarlet Mormon':['#111','#d62020'],
+  'Butterfly-Tailed Jay':['#1f2a1f','#9be37f']
 };
+const SP_KEYS = Object.keys(SPECIES);
 const QA = [
   'Healthy and firm, no discoloration or mold',
   'No deformities or damage; cremaster intact',
   'Correct size and weight for the species',
   'Not yet matured (freshly pupated, within 2 days)'
 ];
-const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
-// Built-in farms. Names must match FARM_DEFAULTS in Code_v6.gs exactly.
-const FARMS = {
-  'JCM Butterfly Breeding Farm':{loc:'Cawit, Boac, Marinduque',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
-  'JCM Butterfly Farm':{loc:'Marinduque',ll:[13.4,121.9],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
-  'La Anton Insects & Butterfly Farm':{loc:'Cawit, Boac, Marinduque',ll:[13.3837773,121.8396811],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'0927 976 3905',sp:STD},
-  "Lorica's Butterfly Breeding Farm":{loc:'Bunganay, Boac, Marinduque',ll:[13.391627752131035,121.83732779599431],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 927 923 4527',sp:STD},
-  'Lyra-Ysabelle Butterfly':{loc:'Cawit, Boac, Marinduque',ll:[13.380662651692896,121.82747508250148],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'(042) 754 5380',sp:STD},
-  'Marl Insects Farm':{loc:'Caganhao, Boac, Marinduque',ll:[13.402601213675057,121.82643398620317],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 918 128 4360',sp:STD},
-  'Saluciana Integrated and Butterfly Farm':{loc:'Sta. Cruz, Marinduque',ll:[13.43847474827148,122.0971865954574],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 915 123 4269',sp:STD},
-  'Butterfly Paradise Farm':{loc:'Baguio City',ll:[16.4023,120.5960],p:150,c:20,h:'8:00 AM - 5:00 PM',tel:'+63 917 123 4567',sp:STD},
-  'Rainbow Wings Sanctuary':{loc:'Tagaytay',ll:[14.1059,120.9627],p:120,c:15,h:'9:00 AM - 4:00 PM',tel:'+63 918 234 5678',sp:['Conservation education','Native species','Research tours']},
-  'Monarch Breeding Center':{loc:'Los Baños, Laguna',ll:[14.1693,121.2376],p:200,c:12,h:'10:00 AM - 3:00 PM (By appointment)',tel:'+63 919 345 6789',sp:['Research tours','Breeding techniques','Student programs']}
-};
-const SLOTS = ['09:00 AM - 11:00 AM','11:00 AM - 01:00 PM','01:00 PM - 03:00 PM','03:00 PM - 05:00 PM'];
 const ID_TYPES = ['Passport',"Driver's license",'PhilSys ID','UMID','Postal ID','SSS','Employee ID','Student ID'];
+const SLOTS = ['09:00 AM - 11:00 AM','11:00 AM - 01:00 PM','01:00 PM - 03:00 PM','03:00 PM - 05:00 PM'];
 const ROLE_LIST = ['purchaser','buyer','breeder','enthusiast','farmowner','admin'];
-const ROLE_NAME = {purchaser:'Purchaser',buyer:'Buyer',breeder:'Breeder',enthusiast:'Enthusiast / Visitor',farmowner:'Farm owner',admin:'Administrator'};
-const LIVE = ['Awaiting Approval','Pending Payment','Payment Submitted','Confirmed'];
-const SOON = 12 * 36e5;
-// Must match the task keys in Classification.gs
+const ROLE_NAME = {purchaser:'Purchaser',buyer:'Buyer',breeder:'Breeder',enthusiast:'Visitor',farmowner:'Farm owner',admin:'Administrator'};
 const CLS_TASKS = [
-  {v:'species', t:'Species identification'},
-  {v:'stage', t:'Lifecycle stage'},
-  {v:'disease', t:'Larval disease'},
-  {v:'instar', t:'Larvae instar'},
-  {v:'defect', t:'Pupae defect'},
-  {v:'sex', t:'Gender (sexing)'}
+  {v:'species',t:'Species identification'},{v:'stage',t:'Lifecycle stage'},{v:'disease',t:'Larval disease'},
+  {v:'instar',t:'Larvae instar'},{v:'defect',t:'Pupae defect'},{v:'sex',t:'Gender (sexing)'}
 ];
+const PAID = 'Paid – Awaiting Receipt';
+const ACTIVE_RES = ['Awaiting Approval','Pending Payment','Payment Submitted'];
 const CHIP = {
-  'Awaiting Approval':'info','Full':'bad','Pending Payment':'warn','Payment Submitted':'info',
-  'Confirmed':'ok','Rejected':'bad','Cancelled':'bad','Awaiting Payment':'warn',
-  'Paid – Awaiting Receipt':'info','Received':'ok'
+  'Awaiting Approval':'info','Pending Payment':'warn','Payment Submitted':'info','Confirmed':'ok',
+  'Rejected':'bad','Cancelled':'bad','Awaiting Payment':'warn',[PAID]:'info','Received':'ok'
+};
+const NAV = {
+  home:['🏠','Home'], market:['🛍','Market'], pupae:['🐛','Pupae'],
+  visits:['🎫','Visits'], bookings:['📋','Bookings'], more:['☰','More']
+};
+const STD = ['Tropical butterflies','Educational tours','Photography sessions'];
+const FSTD = (loc, tel, ll, h = '8:00 AM - 5:00 PM', sp = STD) => ({loc, tel, h, ll, sp});
+const FARM_INFO = {
+  'JCM Butterfly Breeding Farm': FSTD('Cawit, Boac, Marinduque','0927 976 3905',[16.4023,120.5960]),
+  'JMC Butterfly Farm': FSTD('Dawis, Gasan, Marinduque','0927 976 3905',[13.4,121.9]),
+  'La Anton Insects & Butterfly Farm': FSTD('Cawit, Boac, Marinduque','0927 976 3905',[13.3837773,121.8396811]),
+  "Lorica's Butterfly Breeding Farm": FSTD('Bunganay, Boac, Marinduque','+63 927 923 4527',[13.391627752131035,121.83732779599431]),
+  'Lyra-Ysabelle Butterfly': FSTD('Cawit, Boac, Marinduque','(042) 754 5380',[13.380662651692896,121.82747508250148]),
+  'Marl Insects Farm': FSTD('Caganhao, Boac, Marinduque','+63 918 128 4360',[13.402601213675057,121.82643398620317]),
+  'Saluciana Integrated and Butterfly Farm': FSTD('Sta. Cruz, Marinduque','+63 915 123 4269',[13.43847474827148,122.0971865954574]),
+  'Butterfly Paradise Farm': FSTD('Baguio City','+63 917 123 4567',[16.4023,120.5960]),
+  'Rainbow Wings Sanctuary': FSTD('Tagaytay','+63 918 234 5678',[14.1059,120.9627],'9:00 AM - 4:00 PM',['Conservation education','Native species','Research tours']),
+  'Monarch Breeding Center': FSTD('Los Baños, Laguna','+63 919 345 6789',[14.1693,121.2376],'10:00 AM - 3:00 PM (By appointment)',['Research tours','Breeding techniques','Student programs'])
 };
 
-// ===== STATE =====
-let S = {catalog:{},park:{gName:'',gNo:'',closed:[],farms:{}},capRules:{},booked:{},farms:{},
-         salesRecord:[],reservations:[],lots:[],orders:[],users:{},media:{},survey:{done:false,items:[]}};
-let me = null, cart = {}, manage = false, selSlot = '', viewCat = '', busy = 0, saveT = 0, polling = false, sig = '',
-    chart = null, threadRef = null, adminUsers = [], editing = '', dashboardToken = '', adminFarmPick = '',
-    camStream = null;
+/* =====================================================================
+   STATE
+   ===================================================================== */
+let SESSION = '', me = '', dashToken = '';
+let MEDIA = {};
+let S = blankState();
+const UI = {
+  view:'home', cat:'', edit:false, bFarm:'', bFilter:'active', aFarm:'',
+  visit:{farm:'', date:'', n:1, slot:''}, cart:{}, qty:{}, users:[], threadRef:'', sheetKind:''
+};
+let pollTimer = null, chartRef = null, camStream = null;
 
-// ===== HELPERS =====
+function blankState(){
+  return {users:{},catalog:{},farms:{},capRules:{},booked:{},park:{gName:'',gNo:'',closed:[]},
+          lots:[],orders:[],reservations:[],salesRecord:[],survey:{done:true,items:[]},species:[],today:''};
+}
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
 const $ = id => document.getElementById(id);
 const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sp = s => String(s).replace('Butterfly-', '');
 const cap = s => s[0].toUpperCase() + s.slice(1);
-const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-const today = () => ymd(new Date());
-const tomorrow = () => ymd(new Date(Date.now() + 864e5));
+const pname = s => String(s).replace(/^Butterfly-/, '');
+const money = n => '₱' + Number(n || 0).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays = n => ymd(new Date(Date.now() + n * 864e5));
+const todayStr = () => S.today || ymd(new Date());
 const errText = e => (e && e.message) ? e.message : String(e);
-const money = n => '₱' + Number(n || 0).toFixed(2);
-const myUser = () => (me && S.users[me]) || {};
-const roleOf = () => myUser().role || '';
-const isAdmin = () => roleOf() === 'admin';
-const isBreeder = () => roleOf() === 'breeder';
-const isOwner = () => roleOf() === 'farmowner';
-const isBuyer = () => ['buyer','purchaser'].indexOf(roleOf()) > -1;
-const canShopManage = () => isBreeder() || isAdmin();
-const posts = () => isBreeder();
-const myFarm = () => myUser().farm || '';
-const liveRes = r => LIVE.indexOf(r.status) > -1;
-const itemOf = (b, s) => Object.assign({price: 50, flooded: false}, ((S.catalog || {})[b] || {})[s]);
-const floodedFor = (b, s) => !!itemOf(b, s).flooded;
-const myCat = () => (me && (S.catalog || {})[me]) || {};
-const liveLot = l => l.left > 0 && Date.now() < l.exp && !floodedFor(l.breeder, l.sp);
-const pic = (s, k) => S.media[s + '|' + k] || '';
-const farm = () => $('rFarm').value;
-const nVis = () => Math.max(0, parseInt($('rN').value, 10) || 0);
+const fmt = t => { const d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('en-PH', {dateStyle:'medium', timeStyle:'short'}); };
+const timeLeft = t => { const m = t - Date.now(); if (m <= 0) return 'expired'; const h = Math.floor(m / 36e5); return `${Math.floor(h/24)}d ${h%24}h left`; };
 const chip = st => `<span class="chip ${CHIP[st] || ''}">${esc(st)}</span>`;
-const emptyBox = (icon, text) => `<div class="empty"><div>${icon}</div>${text}</div>`;
-const fmtDate = s => { const d = new Date(s); return isNaN(d) ? String(s || '') : d.toLocaleString('en-PH', {dateStyle:'medium', timeStyle:'short'}); };
-const timeLeft = l => {
-  const m = l.exp - Date.now();
-  if (m <= 0) return 'expired';
-  const h = Math.floor(m / 36e5);
-  return Math.floor(h / 24) + 'd ' + (h % 24) + 'h left';
-};
-const allFarmNames = () => Array.from(new Set([...Object.keys(FARMS), ...Object.keys(S.farms || {})])).sort();
-const farmInfo = f => {
-  const base = FARMS[f] || {}, pr = (S.farms || {})[f] || {};
-  const ll = (pr.lat != null && pr.lng != null) ? [pr.lat, pr.lng] : (base.ll || [0, 0]);
-  return {
-    loc: pr.loc || base.loc || '', tel: pr.tel || base.tel || '', h: pr.hours || base.h || '',
-    p: pr.p != null ? pr.p : (base.p != null ? base.p : 150),
-    c: pr.c != null ? pr.c : (base.c != null ? base.c : 20),
-    ll: ll, sp: (pr.sp && pr.sp.length) ? pr.sp : (base.sp || [])
-  };
-};
-const fp = n => {
-  const pr = (S.farms || {})[n]; if (pr && pr.p != null) return pr.p;
-  const o = S.park.farms && S.park.farms[n]; if (o && o.p != null) return o.p;
-  return farmInfo(n).p;
-};
-const fc = n => {
-  const pr = (S.farms || {})[n]; if (pr && pr.c != null) return pr.c;
-  const o = S.park.farms && S.park.farms[n]; if (o && o.c != null) return o.c;
-  return farmInfo(n).c;
-};
-const capOn = (f, d) => { let c = fc(f); ((S.capRules || {})[f] || []).forEach(r => { if (d >= r.from && d <= r.to) c = r.cap; }); return c; };
-const booked = (f, d, s) => (S.booked || {})[f + '|' + d + '|' + s] || 0;
+const empty = (i, t) => `<div class="empty"><i>${i}</i>${t}</div>`;
+const nameOf = u => (S.users[u] && S.users[u].name) || u;
 
-function toast(t) {
+function setMsg(el, text, type){
+  if (!el) return;
+  el.textContent = text;
+  el.className = type === 'ok' ? 'ok' : type === 'info' ? 'muted' : 'note';
+}
+function toast(t){
   const e = $('toast'); e.textContent = t; e.classList.remove('hide');
   clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('hide'), 3000);
 }
-function farmOptions(selected, allowNone) {
-  return (allowNone ? '<option value="">— none —</option>' : '') +
-    allFarmNames().map(f => `<option value="${esc(f)}" ${f === selected ? 'selected' : ''}>${esc(f)}</option>`).join('');
+
+/* ----- role & permission helpers ----- */
+const mine = () => S.users[me] || {};
+const role = () => mine().role || '';
+const isBuyer = () => ['buyer','purchaser'].includes(role());
+const isBreeder = () => role() === 'breeder';
+const isOwner = () => role() === 'farmowner';
+const isAdmin = () => role() === 'admin';
+const canBuy = () => me && ['buyer','purchaser','breeder'].includes(role());
+const bFarm = () => isOwner() ? (mine().farm || '') : UI.bFarm;
+
+function navFor(){
+  if (!me) return ['home','more'];
+  switch (role()) {
+    case 'farmowner': return ['home','bookings','more'];
+    case 'admin': return ['home','market','bookings','more'];
+    case 'enthusiast': return ['home','visits','more'];
+    default: return ['home','market','pupae','visits','more'];
+  }
 }
 
-// One function for every server call. Works inside Apps Script (google.script.run) and from GitHub Pages / Android (fetch).
-function rpc(fn, ...args) {
+/* ----- catalog & farm helpers ----- */
+const farmNames = () => Object.keys(S.farms || {}).sort();
+const flooded = (b, sp) => !!(((S.catalog[b] || {})[sp]) || {}).flooded;
+const priceOf = (b, sp) => { const e = (S.catalog[b] || {})[sp]; return e && e.price != null ? e.price : 50; };
+const lotOpen = l => l.left > 0 && Date.now() < l.exp && !flooded(l.breeder, l.sp);
+const mediaUrl = (sp, kind) => MEDIA[sp + '|' + kind] || '';
+
+function farmInfo(n){
+  const b = FARM_INFO[n] || {}, s = (S.farms || {})[n] || {};
+  const ll = (s.lat != null && s.lng != null) ? [s.lat, s.lng] : (b.ll || [13.4, 121.9]);
+  return {
+    loc: s.loc || b.loc || '', tel: s.tel || b.tel || '', h: s.hours || b.h || '',
+    sp: (s.sp && s.sp.length) ? s.sp : (b.sp || []),
+    p: s.p != null ? s.p : 150, c: s.c != null ? s.c : 20, ll
+  };
+}
+function capOn(f, d){
+  let c = farmInfo(f).c;
+  ((S.capRules || {})[f] || []).forEach(r => { if (d >= r.from && d <= r.to) c = r.cap; });
+  return c;
+}
+const booked = (f, d, s) => (S.booked || {})[f + '|' + d + '|' + s] || 0;
+
+/* ----- statistics & alerts ----- */
+function statTiles(){
+  const t = todayStr(), R = S.reservations, O = S.orders;
+  switch (role()) {
+    case 'buyer': case 'purchaser': return [
+      [O.filter(o => o.buyer === me && o.status === 'Awaiting Payment').length, 'To pay'],
+      [O.filter(o => o.buyer === me && o.status === 'Received').reduce((a, o) => a + o.qty, 0), 'Pupae bought'],
+      [R.filter(x => x.user === me && ACTIVE_RES.concat('Confirmed').includes(x.status) && x.date >= t).length, 'Upcoming visits']
+    ];
+    case 'breeder': return [
+      [S.lots.filter(l => l.breeder === me && lotOpen(l)).reduce((a, l) => a + l.left, 0), 'Pupae on sale'],
+      [O.filter(o => o.breeder === me && o.status === 'Received').reduce((a, o) => a + o.qty, 0), 'Pupae sold'],
+      [O.filter(o => o.breeder === me && o.status === PAID).length, 'To complete']
+    ];
+    case 'enthusiast': return [
+      [R.filter(x => x.status === 'Confirmed' && x.date >= t).length, 'Confirmed visits'],
+      [R.filter(x => ACTIVE_RES.includes(x.status)).length, 'Pending'],
+      [R.length, 'All bookings']
+    ];
+    case 'farmowner': return [
+      [R.filter(x => x.status === 'Awaiting Approval').length, 'To approve'],
+      [R.filter(x => x.status === 'Payment Submitted').length, 'To confirm pay'],
+      [R.filter(x => x.status === 'Confirmed' && x.date >= t).reduce((a, x) => a + x.n, 0), 'Visitors ahead']
+    ];
+    case 'admin': return [
+      [R.filter(x => ACTIVE_RES.includes(x.status)).length, 'Open bookings'],
+      [O.filter(o => o.status !== 'Received' && o.status !== 'Cancelled').length, 'Open orders'],
+      [Object.keys(S.users).length, 'Accounts']
+    ];
+  }
+  return [];
+}
+function alertsHTML(){
+  const a = [], r = role(), t = todayStr();
+  if (!S.survey.done) a.push(`<div class="alert ok">📝 Share feedback in our 2-minute quality survey. <button class="ghost sm" data-act="openSurvey">Answer</button></div>`);
+  if (isOwner() || isAdmin()) {
+    const n = S.reservations.filter(x => x.status === 'Awaiting Approval').length;
+    const p = S.reservations.filter(x => x.status === 'Payment Submitted').length;
+    if (n) a.push(`<div class="alert">📩 <b>${n}</b> visit request(s) awaiting approval.</div>`);
+    if (p) a.push(`<div class="alert">💳 <b>${p}</b> GCash payment(s) to confirm.</div>`);
+  }
+  if (isBreeder()) {
+    if (!mine().gcash) a.push(`<div class="alert bad">Add your GCash number in More → Profile so buyers can pay you.</div>`);
+    const fl = Object.keys(S.catalog[me] || {}).filter(s => flooded(me, s));
+    if (fl.length) a.push(`<div class="alert bad">🚫 Flooded in your catalog: ${fl.map(s => esc(pname(s))).join(', ')}. Sales are paused.</div>`);
+    const toDo = S.orders.filter(o => o.breeder === me && o.status === PAID).length;
+    if (toDo) a.push(`<div class="alert">💳 <b>${toDo}</b> paid order(s) to confirm receipt.</div>`);
+  }
+  if (isBuyer()) {
+    const due = S.orders.filter(o => o.buyer === me && o.status === 'Awaiting Payment').length;
+    if (due) a.push(`<div class="alert">🧾 <b>${due}</b> order(s) waiting for your GCash payment.</div>`);
+    S.lots.filter(l => lotOpen(l) && l.exp - Date.now() < 12 * 36e5).forEach(l =>
+      a.push(`<div class="alert">⏳ ${esc(pname(l.sp))} from ${esc(nameOf(l.breeder))} expires soon (${timeLeft(l.exp)}).</div>`));
+  }
+  S.reservations.filter(x => x.user === me && x.status === 'Pending Payment').forEach(x =>
+    a.push(`<div class="alert">💙 Visit ${esc(x.ref)} is approved. <button class="btn sm" data-act="openPay" data-ref="${esc(x.ref)}">Pay now</button></div>`));
+  return a.join('') || '<div class="alert ok">✅ Nothing needs your attention right now.</div>';
+}
+function recentHTML(){
+  const items = [];
+  S.orders.forEach(o => items.push({t:o.created, h:`<b>${esc(o.id)}</b> · ${esc(pname(o.sp))} × ${o.qty} · ${money(o.total)} ${chip(o.status)}`}));
+  S.reservations.forEach(x => items.push({t:x.created, h:`<b>${esc(x.ref)}</b> · ${esc(x.farm)} · ${esc(x.date)} · ${x.n} pax ${chip(x.status)}`}));
+  items.sort((a, b) => b.t - a.t);
+  return items.length ? items.slice(0, 6).map(i => `<div class="li">${i.h}</div>`).join('') : empty('🕘', 'Your activity will appear here.');
+}
+
+/* =====================================================================
+   SERVER RPC (Apps Script google.script.run, or fetch when hosted elsewhere)
+   ===================================================================== */
+function rpc(fn, ...args){
   if (IN_APPS_SCRIPT) {
     return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
   }
-  if (APPS_SCRIPT_URL.indexOf('PASTE') === 0) {
-    return Promise.reject(new Error('The server address is not set in this app. Open the app from its Apps Script /exec link, or paste the full /exec URL into SERVER_FALLBACK_URL.'));
-  }
   return fetch(APPS_SCRIPT_URL, {
-    method: 'POST', redirect: 'follow',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({fn: fn, args: args})
   })
     .then(r => { if (!r.ok) throw new Error('Server returned HTTP ' + r.status + '. Check the deployment is active and set to Anyone.'); return r.text(); })
     .then(t => {
       let j;
       try { j = JSON.parse(t); }
-      catch (e) { throw new Error('The server answered with a web page instead of data. Set the access to Anyone, or the address is an old deployment.'); }
+      catch (e) { throw new Error('The server returned a web page instead of data. Check the deployment access settings.'); }
       if (j.error) throw new Error(j.error);
       return j.result;
     })
     .catch(e => {
-      if (e instanceof TypeError) throw new Error('Cannot reach the server from this browser. Address used: ' + APPS_SCRIPT_URL + '. Open the app from this /exec link in Chrome, then try again.');
+      if (e instanceof TypeError) throw new Error('Cannot reach the server from this browser. Open the app from its /exec link and try again.');
       throw e;
     });
 }
-function log(action, detail) { if (me) rpc('logActivity', me, roleOf() || '-', action, String(detail || '')).catch(() => {}); }
+/** Every authenticated call passes the session token as its first argument. */
+const api = (fn, ...args) => rpc(fn, SESSION, ...args);
 
-// ===== DATA SYNC =====
-function applyState(x) {
-  if (!x) return;
-  S.catalog = x.catalog || {};
-  S.park = Object.assign({gName:'',gNo:'',closed:[],farms:{}}, x.park || {});
-  S.capRules = x.capRules || {};
-  S.booked = x.booked || {};
-  S.farms = x.farms || {};
-  S.salesRecord = x.salesRecord || [];
-  S.reservations = x.reservations || [];
-  S.lots = x.lots || [];
-  S.orders = x.orders || [];
-  S.users = x.users || {};
-  S.survey = x.survey || {done: false, items: []};
+/* =====================================================================
+   SESSION & SYNC
+   ===================================================================== */
+function saveSession(){
+  try {
+    sessionStorage.setItem('lvToken', SESSION);
+    sessionStorage.setItem('lvUser', me);
+    sessionStorage.setItem('lvDash', dashToken || '');
+  } catch (e) {}
 }
-function setLive(ok) {
-  $('live').classList.toggle('off', !ok);
-  $('liveTxt').textContent = ok ? 'Live · synced ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Offline – retrying';
+function clearSession(){
+  SESSION = ''; me = ''; dashToken = ''; S = blankState();
+  try { ['lvToken','lvUser','lvDash'].forEach(k => sessionStorage.removeItem(k)); } catch (e) {}
 }
-function loadAll(cb) {
-  return rpc('getState', me).then(
-    st => { applyState(st); setLive(true); },
-    e => { setLive(false); toast('Cannot reach server: ' + errText(e)); }
-  ).then(() => {
-    if (me && !S.users[me]) { me = null; clearSession(); }
-    if (cb) cb();
-  });
+function setLive(ok){
+  $('pill').classList.toggle('off', !ok);
+  $('pillT').textContent = ok ? 'Live · synced ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Offline – retrying';
 }
-function save() {
-  if (!me) return;
-  clearTimeout(saveT);
-  saveT = setTimeout(() => {
-    saveT = 0; busy++;
-    rpc('saveState', me, {park: S.park})
-      .catch(e => toast('Save failed: ' + errText(e))).finally(() => busy--);
-  }, 250);
+function refresh(){
+  if (!SESSION) { S = blankState(); return Promise.resolve(); }
+  return api('getState')
+    .then(st => { S = st; if (!S.users[me]) throw new Error('Please log in again.'); setLive(true); })
+    .catch(e => {
+      if (/log in again|expired/i.test(errText(e))) { clearSession(); toast('Please log in again.'); }
+      else setLive(false);
+    });
 }
-function poll() {
-  if (busy || saveT) return;
-  loadAll(() => {
-    const s = JSON.stringify([S.catalog, S.farms, S.capRules, S.booked, S.lots.map(l => [l.id, l.left, l.price]),
-      S.orders.map(o => [o.id, o.status]), S.reservations.map(r => [r.ref, r.status]), S.salesRecord.length,
-      S.survey.done, me ? S.users[me] : null]);
-    if (s !== sig) { sig = s; renderAll(); }
-    if (me) { checkPopup(); if (threadRef) loadThread(); }
-  });
+function startPolling(){
+  if (pollTimer) return;
+  pollTimer = setInterval(poll, 6000);
 }
-function startPolling() { if (!polling) { polling = true; setInterval(poll, 6000); } }
-function renderAll() {
-  renderHeader(); applyNav(); renderHome(); renderMarket();
-  if ($('lotList')) renderLots();
-  if ($('orderList')) renderOrders();
-  if (!$('vVisits').classList.contains('hide')) { initVisits(); renderSlots(); }
-  if (!$('vFarm').classList.contains('hide')) fillFarm();
-  renderRes(); renderOwnerPanel(); renderSales();
+let pollBusy = false;
+function isTyping(){
+  const a = document.activeElement;
+  return !!a && ['INPUT','TEXTAREA','SELECT'].includes(a.tagName) && a.type !== 'checkbox' && a.type !== 'radio';
 }
-
-// ===== HEADER & NAV =====
-function renderHeader() {
-  const u = myUser();
-  $('greet').textContent = me ? 'Welcome back, ' + (u.name || me) : 'Welcome, guest';
-  $('title').textContent = u.role === 'breeder' ? '🦋 Breeding Farm' : u.role === 'farmowner' ? '🦋 Farm Owner' : '🦋 Butterfly Shop';
+function poll(){
+  if (!SESSION || pollBusy || isTyping()) return;
+  pollBusy = true;
+  refresh().then(renderLive).finally(() => { pollBusy = false; });
 }
-function applyNav() {
-  $('nPupae').classList.toggle('hide', !me || ['enthusiast', 'farmowner', 'admin'].indexOf(roleOf()) > -1);
-  $('nVisits').classList.toggle('hide', !me);
-  $('nVisitsIc').textContent = isOwner() ? '📋' : '🎫';
-  $('nVisitsLabel').textContent = isOwner() ? 'Orders' : 'Visits';
-}
-
-// ===== LOGIN / REGISTER (shown on the Home page) =====
-function authCard() {
-  return `<div class="card"><h3>🔐 Log in or register</h3>
-    <div class="seg"><button id="tabLi" class="on" onclick="showAuth('login')">Log in</button><button id="tabRg" onclick="showAuth('register')">Register</button></div>
-    <div id="formLogin">
-      <label>Username<input id="liUser" autocomplete="username"></label>
-      <label>Password<input id="liPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></label>
-      <p class="note" id="lMsg"></p>
-      <button class="btn" onclick="doLogin()">Log in</button>
-    </div>
-    <div id="formReg" class="hide">
-      <label>I am registering as a<select id="lRole" onchange="roleChanged()"><option value="buyer">Buyer (order pupae)</option><option value="breeder">Breeder</option><option value="enthusiast">Enthusiast / Visitor (book farm visits)</option></select></label>
-      <label>Full name<input id="lName" autocomplete="name"></label>
-      <label>Phone number<input id="lPhone" type="tel" autocomplete="tel"></label>
-      <label>Email<input id="lEmail" type="email" autocomplete="email"></label>
-      <label><span id="lOrgL">Company / buyer name (optional)</span><input id="lOrg"></label>
-      <label>Address (barangay, town, province, country)<input id="lAddr"></label>
-      <div id="idBox">
-        <label>Valid ID type<select id="lIdType">${ID_TYPES.map(t => `<option>${esc(t)}</option>`).join('')}</select></label>
-        <label>ID number<input id="lIdNo" autocomplete="off"></label>
-      </div>
-      <label>Choose a username<input id="rgUser" autocomplete="username"></label>
-      <label>Choose a password<input id="rgPass" type="password" autocomplete="new-password"></label>
-      <label>Confirm password<input id="rgPass2" type="password" autocomplete="new-password"></label>
-      <label style="display:flex;gap:8px;align-items:flex-start;font-weight:600"><input type="checkbox" id="rgTerms" style="width:auto;margin:3px 0 0"> I have read and agree to the <a href="${LEGAL_URL}" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a></label>
-      <p class="note" id="lMsg2"></p>
-      <button class="btn" onclick="doRegister()">Create Account</button>
-    </div>
-  </div>`;
-}
-function showAuth(m) {
-  $('formLogin').classList.toggle('hide', m !== 'login');
-  $('formReg').classList.toggle('hide', m !== 'register');
-  $('tabLi').classList.toggle('on', m === 'login');
-  $('tabRg').classList.toggle('on', m === 'register');
-}
-function roleChanged() {
-  const r = $('lRole').value;
-  $('lOrgL').textContent = r === 'breeder' ? 'Farm / breeding business name' : (r === 'buyer') ? 'Company / buyer name (optional)' : 'Organization / school (optional)';
-  $('idBox').classList.toggle('hide', r !== 'buyer');
-}
-function doLogin() {
-  const u = $('liUser').value.trim().toLowerCase(), pw = $('liPass').value;
-  if (!u || !pw) { $('lMsg').textContent = 'Enter your username and password.'; return; }
-  auth('login', '', u, pw, {}, $('lMsg'));
-}
-function doRegister() {
-  const r = $('lRole').value, u = $('rgUser').value.trim().toLowerCase(), pw = $('rgPass').value, m = $('lMsg2');
-  if (pw !== $('rgPass2').value) { m.textContent = 'Passwords do not match.'; return; }
-  if (!$('rgTerms').checked) { m.textContent = 'Please accept the Terms and Conditions and Privacy Policy to register.'; return; }
-  const x = {
-    mode: 'register', terms: true, name: $('lName').value.trim(), phone: $('lPhone').value.trim(), email: $('lEmail').value.trim(),
-    org: $('lOrg').value.trim(), addr: $('lAddr').value.trim(), idType: $('lIdType').value, idNo: $('lIdNo').value.trim()
-  };
-  auth('register', r, u, pw, x, m);
-}
-function auth(mode, role_, u, pw, x, m) {
-  m.textContent = mode === 'login' ? 'Signing in…' : 'Creating account…';
-  rpc('login', role_, u, pw, x).then(res => {
-    if (!res.ok) { m.textContent = res.msg; return; }
-    m.textContent = '';
-    dashboardToken = res.dashboardToken || '';
-    try {
-      sessionStorage.setItem('bpUser', u);
-      if (dashboardToken) sessionStorage.setItem('bpDashboardToken', dashboardToken);
-      else sessionStorage.removeItem('bpDashboardToken');
-    } catch (e) {}
-    me = u;
-    loadAll(() => { enter(); toast('Welcome!'); });
-  }).catch(e => { m.textContent = 'Server error: ' + errText(e); });
-}
-function clearSession() {
-  try { sessionStorage.removeItem('bpUser'); sessionStorage.removeItem('bpDashboardToken'); } catch (e) {}
-  dashboardToken = '';
-}
-function enter() {
-  initVisits();
-  rpc('getMedia').then(m => { S.media = m || {}; renderMarket(); }).catch(() => {});
-  startPolling();
-  showView('home');
+function renderLive(){
+  if (!me) { if (UI.view !== 'home') showView('home'); else renderHome(); return; }
+  renderHeader(); renderNav();
+  switch (UI.view) {
+    case 'home': renderHome(); break;
+    case 'market': renderMarket(); break;
+    case 'pupae': renderPupaeLists(); break;
+    case 'visits': renderVisitsLists(); updateSlots(); break;
+    case 'bookings': renderBookingsLists(); break;
+  }
+  renderCartBadge();
+  if (UI.threadRef) loadThread();
   checkPopup();
 }
-function logout() {
-  camClose();
-  log('Logout', '');
-  clearSession();
-  me = null; cart = {}; manage = false; adminUsers = []; editing = '';
-  renderHeader(); applyNav();
-  $('vFarm').innerHTML = '';
-  showView('home');
-  toast('Logged out');
-}
 
-// ===== NAVIGATION =====
-function showView(v) {
-  camClose();
-  // Guests can browse Home (with the login form), Market, and More (legal section). Other screens need a login.
-  if (!me && ['visits', 'pupae', 'farm'].indexOf(v) > -1) { toast('Please log in first.'); v = 'home'; }
-  if (me && myUser().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
-  if (v === 'visits' && isOwner()) v = 'farm';
-  if (v === 'farm' && !isOwner()) { toast('The Orders panel is for farm owners.'); v = 'home'; }
-  ['home', 'market', 'pupae', 'visits', 'farm', 'more'].forEach(x => {
-    $('v' + cap(x)).classList.toggle('hide', x !== v);
-  });
-  $('nHome').classList.toggle('on', v === 'home');
-  $('nMarket').classList.toggle('on', v === 'market');
-  $('nPupae').classList.toggle('on', v === 'pupae');
-  $('nVisits').classList.toggle('on', v === 'visits' || v === 'farm');
-  $('nMore').classList.toggle('on', v === 'more');
-  if (v === 'pupae') renderPupaeShell();
-  if (v === 'visits') initVisits();
-  if (v === 'more') renderMore();
-  if (v === 'farm') renderFarm();
-  renderAll();
+/* =====================================================================
+   HEADER, NAV & VIEW SWITCHING
+   ===================================================================== */
+function renderHeader(){
+  $('hGreet').textContent = me ? 'Welcome back, ' + (mine().name || me) : 'Welcome, guest';
+  const t = {breeder:'Breeding Farm', farmowner:'Farm Owner', admin:'Administration', enthusiast:'Visitor Booking'}[role()] || 'Butterfly Marketplace';
+  $('hTitle').textContent = me ? 'LepVision · ' + t : 'LepVision Marketplace';
+  $('cartBtn').classList.toggle('hide', !canBuy());
+  renderCartBadge();
+}
+function renderNav(){
+  const nav = $('nav');
+  nav.innerHTML = navFor().map(v =>
+    `<button class="${UI.view === v ? 'on' : ''}" data-act="nav" data-v="${v}"><span class="ic">${NAV[v][0]}</span>${NAV[v][1]}</button>`
+  ).join('');
+  nav.classList.remove('hide');
+}
+function showView(v){
+  if (me && mine().mustChange && v !== 'more') { toast('Please set your new password first.'); v = 'more'; }
+  if (!navFor().includes(v)) v = 'home';
+  UI.view = v;
+  ['home','market','pupae','visits','bookings','more'].forEach(x => $('v' + cap(x)).classList.toggle('hide', x !== v));
+  renderNav(); renderHeader();
+  ({home:renderHome, market:renderMarket, pupae:renderPupae, visits:renderVisits,
+    bookings:renderBookings, more:renderMore})[v]();
   window.scrollTo(0, 0);
 }
 
-// ===== HOME & ALERTS =====
-function renderHome() {
-  const logged = !!me && !!S.users[me];
-  if (!logged) {
-    // Logged out: the login / register form is the first thing on Home
-    if (!$('loginBox').innerHTML) $('loginBox').innerHTML = authCard();
-    $('homeMain').classList.add('hide');
+/* =====================================================================
+   HOME
+   ===================================================================== */
+function tourCard(){
+  return `<div class="card" style="text-align:center">
+    <h3 style="margin:0 0 6px">🗺 Plan a Marinduque tour</h3>
+    <p class="muted">Butterfly sanctuaries, smart farming, Moriones heritage and beaches.</p>
+    <a class="btn block" href="${TOUR_URL}" target="_top" style="text-decoration:none">Open tour planner</a></div>`;
+}
+function renderHome(){
+  const el = $('vHome');
+  if (!me) {
+    el.innerHTML = `<div class="card"><div class="card-h"><h3>Welcome to LepVision</h3></div>
+      <p class="muted">Order export-grade butterfly pupae from licensed breeders and book guided visits to partner farms in Marinduque and beyond.</p></div>
+      ${authCard()}${tourCard()}`;
     return;
   }
-  $('loginBox').innerHTML = '';
-  $('homeMain').classList.remove('hide');
-
-  const now = Date.now(), u = myUser();
-  const myOrders = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
-  const myBookings = S.reservations.filter(r => r.user === me);
-  $('stAvail').textContent = S.lots.filter(liveLot).reduce((a, l) => a + l.left, 0);
-  $('stOrders').textContent = myOrders.length;
-  $('stVisits').textContent = myBookings.length;
-
-  let al = '';
-  if (!S.survey.done) {
-    al += `<div class="alert good">📝 Please answer our 2-minute quality survey (ISO/IEC 25010). <button class="ghost" style="margin-left:6px;padding:4px 10px" onclick="openSurvey()">Answer now</button></div>`;
-  }
-  if (isOwner() || isAdmin()) {
-    const waiting = S.reservations.filter(r => r.status === 'Awaiting Approval' && (isAdmin() || r.farm === u.farm)).length;
-    if (waiting) al += `<div class="alert">📩 <b>${waiting}</b> visit request(s) waiting for your approval. Open ${isOwner() ? 'Orders' : 'More → Farm bookings'}.</div>`;
-  }
-  if (posts()) {
-    Object.keys(myCat()).forEach(s => {
-      if (myCat()[s].flooded) al += `<div class="alert red">🚫 <b>${esc(sp(s))}</b> is flooded in your catalog. Listings are paused.</div>`;
-    });
-    const newOrd = S.orders.filter(o => o.breeder === me && o.status === 'Awaiting Payment').length;
-    const toConfirm = S.orders.filter(o => o.breeder === me && o.status === 'Paid – Awaiting Receipt').length;
-    if (newOrd) al += `<div class="alert">🧾 <b>${newOrd}</b> new order(s) waiting for buyer payment.</div>`;
-    if (toConfirm) al += `<div class="alert">💳 <b>${toConfirm}</b> payment(s) to confirm.</div>`;
-  }
-  S.lots.filter(l => liveLot(l) && l.exp - now < SOON && (!posts() || l.breeder === me)).forEach(l => {
-    al += `<div class="alert">⏳ <b>${esc(sp(l.sp))}</b> from ${esc((S.users[l.breeder] || {}).name || l.breeder)} – ${timeLeft(l)}</div>`;
-  });
-  $('alerts').innerHTML = al || '<div class="alert good">✅ Nothing needs your attention right now.</div>';
-  renderMyDash();
-}
-
-function renderMyDash() {
-  const el = $('myDash'); if (!el) return;
-  if (!me) { el.innerHTML = emptyBox('🔒', 'Log in to see your dashboard.'); return; }
-  const t0 = today();
-  const orders = S.orders.filter(o => o.buyer === me || o.breeder === me);
-  const bought = orders.filter(o => o.buyer === me && o.status === 'Received');
-  const sold = orders.filter(o => o.breeder === me && o.status === 'Received');
-  const pendingPay = orders.filter(o => o.buyer === me && o.status === 'Awaiting Payment').length;
-  const toConfirm = orders.filter(o => o.breeder === me && o.status === 'Paid – Awaiting Receipt').length;
-  const bookings = S.reservations.filter(r => r.user === me);
-  const upcoming = bookings.filter(r => liveRes(r) && r.date >= t0).length;
-  const activeLeft = posts() ? S.lots.filter(l => l.breeder === me && l.left > 0 && Date.now() < l.exp).reduce((a, l) => a + l.left, 0) : 0;
-
-  const stats = [];
-  if (isBuyer()) stats.push(['Pupae bought', bought.reduce((a, o) => a + o.qty, 0)], ['Total spent', money(bought.reduce((a, o) => a + o.total, 0))], ['Awaiting payment', pendingPay]);
-  if (posts()) stats.push(['Pupae sold', sold.reduce((a, o) => a + o.qty, 0)], ['Revenue', money(sold.reduce((a, o) => a + o.total, 0))], ['Pupae on sale', activeLeft]);
-  if (!isBuyer() && !posts()) stats.push(['Upcoming visits', upcoming], ['Bookings', bookings.length], ['Confirmed', bookings.filter(r => r.status === 'Confirmed').length]);
-
-  const recent = [
-    ...orders.map(o => ({when: o.created, html: `<b>${esc(o.id)}</b> · ${esc(sp(o.sp))} × ${o.qty} · ${money(o.total)} <span class="muted">${esc(o.buyer === me ? 'as buyer' : 'as seller')}</span> ${chip(o.status)}`})),
-    ...bookings.map(r => ({when: r.created || 0, html: `<b>${esc(r.ref)}</b> · ${esc(r.farm)} · ${esc(r.date)} · ${r.n} visitor(s) ${chip(r.status)}`}))
-  ].sort((a, b) => (b.when || 0) - (a.when || 0)).slice(0, 6);
-
-  const actions = [];
-  if (pendingPay) actions.push(`🧾 ${pendingPay} order(s) to pay`);
-  if (toConfirm) actions.push(`💳 ${toConfirm} payment(s) to confirm`);
-  if (bookings.some(r => r.status === 'Pending Payment')) actions.push('💙 A visit is approved and waiting for payment');
-
   el.innerHTML = `
-    <div class="stats" style="margin-bottom:10px">${stats.map(([a, b]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(a)}</span></div>`).join('')}</div>
-    ${actions.length ? `<div class="alert">${actions.map(esc).join('<br>')}</div>` : ''}
-    ${recent.length ? recent.map(x => `<div class="item">${x.html}</div>`).join('') : emptyBox('🕘', 'Your transactions will appear here.')}`;
+    <div class="stats">${statTiles().map(([v, l]) => `<div class="stat"><b>${v}</b><span>${esc(l)}</span></div>`).join('')}</div>
+    <div class="card"><div class="card-h"><h3>⚠️ Attention</h3></div>${alertsHTML()}</div>
+    <div class="card"><div class="card-h"><h3>Quick actions</h3></div>
+      <div class="qa">${navFor().filter(v => v !== 'home' && v !== 'more').map(v =>
+        `<button class="qbtn" data-act="nav" data-v="${v}"><span>${NAV[v][0]}</span>${NAV[v][1]}</button>`).join('')}</div></div>
+    <div class="card"><div class="card-h"><h3>Recent activity</h3></div>${recentHTML()}</div>`;
 }
 
-// ===== SURVEY (ISO/IEC 25010) =====
-function openSurvey() {
-  if (!me) { toast('Please log in first.'); return; }
-  if (S.survey.done) { toast('Thank you, you already answered the survey.'); return; }
-  let h = '', last = '';
-  (S.survey.items || []).forEach(it => {
-    if (it.c !== last) { h += `<h4 style="margin:14px 0 6px;color:var(--p1)">${esc(it.c)}</h4>`; last = it.c; }
-    h += `<div class="item"><div style="margin-bottom:6px">${esc(it.q)}</div><div class="row">` +
-      [1, 2, 3, 4, 5].map(n => `<label style="display:inline-flex;align-items:center;gap:4px;margin:0;font-weight:600;color:var(--text)"><input type="radio" name="sv_${it.id}" value="${n}" style="width:auto;margin:0"> ${n}</label>`).join('') +
-      `</div></div>`;
-  });
-  $('svBody').innerHTML = h;
-  $('svMsg').textContent = '';
-  $('survey').classList.remove('hide');
-}
-function closeSurvey() { $('survey').classList.add('hide'); }
-function submitSurveyForm() {
-  const answers = {}, missing = [];
-  (S.survey.items || []).forEach(it => {
-    const r = document.querySelector(`input[name="sv_${it.id}"]:checked`);
-    if (r) answers[it.id] = parseInt(r.value, 10); else missing.push(it.id);
-  });
-  const m = $('svMsg');
-  if (missing.length) { m.className = 'note'; m.textContent = 'Please answer every statement (' + missing.length + ' left).'; return; }
-  m.className = 'muted'; m.textContent = 'Sending…';
-  rpc('submitSurvey', me, answers, $('svComment').value.trim()).then(() => {
-    closeSurvey(); toast('Thank you! Survey submitted.');
-    loadAll(() => renderAll());
-  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
-}
-function loadSurveyResults() {
-  rpc('getSurveyResults', me).then(r => {
-    $('svResults').innerHTML = `<p class="muted">${r.responses} response(s) · overall average <b>${r.overall == null ? '–' : r.overall}</b> / 5</p>
-      <div class="tw"><table><thead><tr><th>Characteristic (ISO/IEC 25010)</th><th>Average</th></tr></thead><tbody>
-      ${r.characteristics.map(c => `<tr><td>${esc(c.name)}</td><td>${c.average == null ? '–' : c.average}</td></tr>`).join('')}
-      </tbody></table></div>
-      ${r.comments.length ? '<h4 style="margin:12px 0 6px">Recent comments</h4>' + r.comments.map(c => `<div class="item">${esc(c)}</div>`).join('') : ''}`;
-  }).catch(e => toast(errText(e)));
-}
-
-// ===== MARKET =====
-function butterflySVG(c) {
-  return `<svg viewBox="0 0 100 80" width="64" height="52"><ellipse cx="30" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(-20 30 28)"/><ellipse cx="70" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(20 70 28)"/><ellipse cx="34" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><ellipse cx="66" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><rect x="46" y="15" width="8" height="52" rx="4" fill="#333"/></svg>`;
-}
-function pupaSVG(c) {
-  return `<svg viewBox="0 0 60 90" width="44" height="62"><path d="M30 4 C48 14 50 50 30 84 C10 50 12 14 30 4Z" fill="${c[1]}" stroke="${c[0]}" stroke-width="3"/><path d="M18 30 Q30 36 42 30 M16 46 Q30 54 44 46 M20 62 Q30 68 40 62" stroke="${c[0]}" stroke-width="2" fill="none"/></svg>`;
-}
-function renderMarket() {
-  const box = $('grid'); if (!box) return;
-  const list = Object.keys(S.users).filter(x => S.users[x].role === 'breeder');
-  if (!viewCat || list.indexOf(viewCat) < 0) viewCat = (isBreeder() && list.indexOf(me) > -1) ? me : (list[0] || '');
-  const b = viewCat, mine = isBreeder() && b === me, editable = mine && manage;
-  $('catBar').innerHTML = list.length ? `<div class="row" style="justify-content:space-between;align-items:flex-end">
-      <label style="flex:1;margin:0;min-width:160px">Breeder catalog
-        <select onchange="viewCat=this.value;renderMarket()">${list.map(x => `<option value="${esc(x)}" ${x === b ? 'selected' : ''}>${esc((S.users[x] || {}).name || x)}</option>`).join('')}</select></label>
-      ${mine ? `<button class="ghost" onclick="toggleManage()">${manage ? 'Done' : '✏️ Manage prices'}</button>` : ''}
-    </div>` : '';
-  box.innerHTML = !b ? emptyBox('🦋', 'No breeder catalogs yet.') : Object.keys(SPECIES).map((s, i) => {
-    const d = itemOf(b, s), c = SPECIES[s];
-    const bImg = pic(s, 'butterfly'), pImg = pic(s, 'pupa');
-    return `<div class="sp ${d.flooded ? 'flooded' : ''}">
-      <div class="imgs">
-        <div>${bImg ? `<img src="${bImg}" alt="">` : butterflySVG(c)}<br>Butterfly</div>
-        <div>${pImg ? `<img src="${pImg}" alt="">` : pupaSVG(c)}<br>Pupa</div>
+/* ----- auth (guests) ----- */
+function authCard(){
+  return `<div class="card">
+    <div class="seg"><button id="tLogin" class="on" data-act="authTab" data-m="login">Log in</button><button id="tReg" data-act="authTab" data-m="register">Register</button></div>
+    <div id="fLogin">
+      <label class="f">Username<input id="liUser" autocomplete="username"></label>
+      <label class="f">Password<input id="liPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></label>
+      <p class="note" id="authMsg"></p>
+      <button class="btn block" data-act="doLogin">Log in</button>
+    </div>
+    <div id="fReg" class="hide">
+      <label class="f">I am registering as
+        <select id="rRole" data-chg="regRole">
+          <option value="buyer">Buyer — order pupae</option>
+          <option value="breeder">Breeder — post pupae for sale</option>
+          <option value="enthusiast">Visitor — book farm visits</option>
+        </select></label>
+      <div class="g2">
+        <label class="f">Full name<input id="rName" autocomplete="name"></label>
+        <label class="f">Phone<input id="rPhone" type="tel" autocomplete="tel"></label>
       </div>
-      <div><b>${esc(sp(s))}</b>${d.flooded ? '<span class="badge">FLOODED</span>' : ''}</div>
-      <div class="price">₱${Number(d.price).toFixed(2)} <span class="muted">/ pupa</span></div>
-      <div class="row"><input type="number" min="1" value="1" id="qty${i}" style="margin:0;width:72px" ${d.flooded ? 'disabled' : ''}>
-        <button class="btn" style="padding:10px" ${d.flooded ? 'disabled' : ''} onclick="addToCart('${esc(b)}','${s}',${i})">${d.flooded ? 'Flooded' : 'Add to cart'}</button></div>
-      ${editable ? `<div class="item" style="font-size:.78rem">
-        <label>Price (₱)<input type="number" min="0" step="0.5" value="${d.price}" onchange="setCatPrice('${s}',this.value)"></label>
-        <label>Cost per pupa (₱, for profit)<input type="number" min="0" step="0.5" value="${(itemOf(b, s).cost) || 0}" onchange="setCatCost('${s}',this.value)"></label>
-        <label><input type="checkbox" style="width:auto" ${d.flooded ? 'checked' : ''} onchange="setCatFlood('${s}',this.checked)"> Flooded (disable buying)</label>
-        <label>Butterfly photo<input type="file" accept="image/*" onchange="setImg('${s}','butterfly',this)"></label>
-        <label>Pupa photo<input type="file" accept="image/*" onchange="setImg('${s}','pupa',this)"></label>
+      <label class="f">Email<input id="rEmail" type="email" autocomplete="email"></label>
+      <label class="f"><span id="rOrgL">Company (optional)</span><input id="rOrg"></label>
+      <label class="f">Address<input id="rAddr"></label>
+      <div id="rIdBox" class="g2">
+        <label class="f">Valid ID type<select id="rIdType">${ID_TYPES.map(t => `<option>${esc(t)}</option>`).join('')}</select></label>
+        <label class="f">ID number<input id="rIdNo" autocomplete="off"></label>
+      </div>
+      <div class="g2">
+        <label class="f">Username<input id="rUser" autocomplete="username"></label>
+        <label class="f">Password<input id="rPass" type="password" autocomplete="new-password"></label>
+      </div>
+      <label class="f">Confirm password<input id="rPass2" type="password" autocomplete="new-password"></label>
+      <label class="cb"><input type="checkbox" id="rTerms"> I agree to the <a href="${LEGAL_URL}" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a></label>
+      <p class="note" id="authMsg2"></p>
+      <button class="btn block" data-act="doRegister">Create account</button>
+    </div>
+  </div>`;
+}
+function doLogin(){
+  const u = $('liUser').value.trim().toLowerCase(), p = $('liPass').value, m = $('authMsg');
+  if (!u || !p) return setMsg(m, 'Enter your username and password.');
+  setMsg(m, 'Signing in…', 'info');
+  rpc('login', '', u, p, {mode:'login'})
+    .then(res => res.ok ? startSession(u, res) : setMsg(m, res.msg))
+    .catch(e => setMsg(m, errText(e)));
+}
+function doRegister(){
+  const v = id => $(id).value.trim(), m = $('authMsg2');
+  const role_ = v('rRole'), u = v('rUser').toLowerCase(), pw = $('rPass').value;
+  if (pw !== $('rPass2').value) return setMsg(m, 'Passwords do not match.');
+  if (!$('rTerms').checked) return setMsg(m, 'Please accept the Terms and Conditions and Privacy Policy.');
+  setMsg(m, 'Creating account…', 'info');
+  rpc('login', role_, u, pw, {
+    mode:'register', terms:true, name:v('rName'), phone:v('rPhone'), email:v('rEmail'),
+    org:v('rOrg'), addr:v('rAddr'), idType:$('rIdType').value, idNo:v('rIdNo')
+  })
+    .then(res => res.ok ? startSession(u, res) : setMsg(m, res.msg))
+    .catch(e => setMsg(m, errText(e)));
+}
+function startSession(u, res){
+  SESSION = res.token; me = u; dashToken = res.dashboardToken || '';
+  saveSession();
+  return refresh().then(() => { showView('home'); startPolling(); toast('Welcome!'); });
+}
+function regRoleChanged(){
+  const r = $('rRole').value;
+  $('rOrgL').textContent = r === 'breeder' ? 'Farm / breeding business name' : r === 'buyer' ? 'Company (optional)' : 'Organization or school (optional)';
+  $('rIdBox').classList.toggle('hide', r !== 'buyer');
+}
+
+/* =====================================================================
+   MARKET
+   ===================================================================== */
+function butterflySVG(c){
+  return `<svg viewBox="0 0 100 80" width="62" height="50"><ellipse cx="30" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(-20 30 28)"/><ellipse cx="70" cy="28" rx="26" ry="22" fill="${c[1]}" stroke="${c[0]}" stroke-width="4" transform="rotate(20 70 28)"/><ellipse cx="34" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><ellipse cx="66" cy="55" rx="18" ry="15" fill="${c[1]}" stroke="${c[0]}" stroke-width="4"/><rect x="46" y="15" width="8" height="52" rx="4" fill="#333"/></svg>`;
+}
+function pupaSVG(c){
+  return `<svg viewBox="0 0 60 90" width="42" height="60"><path d="M30 4 C48 14 50 50 30 84 C10 50 12 14 30 4Z" fill="${c[1]}" stroke="${c[0]}" stroke-width="3"/><path d="M18 30 Q30 36 42 30 M16 46 Q30 54 44 46 M20 62 Q30 68 40 62" stroke="${c[0]}" stroke-width="2" fill="none"/></svg>`;
+}
+function renderMarket(){
+  const el = $('vMarket');
+  const breeders = Object.keys(S.catalog || {}).sort();
+  if (!breeders.length) { el.innerHTML = `<div class="card">${empty('🦋', 'No breeder catalogs are available yet.')}</div>`; return; }
+  if (!breeders.includes(UI.cat)) UI.cat = (isBreeder() && breeders.includes(me)) ? me : breeders[0];
+  const b = UI.cat, own = isBreeder() && b === me, cat = S.catalog[b] || {}, bu = S.users[b] || {};
+  const farmLoc = bu.farm ? farmInfo(bu.farm).loc : '';
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-h"><h3>🛍 Marketplace</h3>
+        ${own ? `<button class="ghost sm" data-act="toggleEdit">${UI.edit ? 'Done editing' : '✏️ Edit my catalog'}</button>` : ''}</div>
+      <label class="f">Breeder catalog
+        <select data-chg="setCat">${breeders.map(x => `<option value="${esc(x)}" ${x === b ? 'selected' : ''}>${esc(nameOf(x))}</option>`).join('')}</select></label>
+      <p class="muted" style="margin:-4px 0 0">${esc(bu.org || '')}${farmLoc ? ' · 📍 ' + esc(farmLoc) : ''}</p>
+      ${canBuy() ? '<p class="muted">Add pupae to your cart and checkout. Pay each seller directly via GCash after placing the order.</p>' : ''}
+    </div>
+    <div class="species">${SP_KEYS.map((sp, i) => speciesCard(b, sp, i, cat[sp] || {price:50, flooded:false, cost:0}, own)).join('')}</div>`;
+}
+function speciesCard(b, sp, i, e, own){
+  const c = SPECIES[sp], canOrder = canBuy() && !e.flooded && !own;
+  const bImg = mediaUrl(sp, 'butterfly'), pImg = mediaUrl(sp, 'pupa');
+  return `<div class="sp ${e.flooded ? 'flood' : ''}">
+    <div class="art">
+      <figure>${bImg ? `<img src="${esc(bImg)}" alt="">` : butterflySVG(c)}<br>Butterfly</figure>
+      <figure>${pImg ? `<img src="${esc(pImg)}" alt="">` : pupaSVG(c)}<br>Pupa</figure>
+    </div>
+    <div class="row between"><b>${esc(pname(sp))}</b>${e.flooded ? '<span class="badge">FLOODED</span>' : ''}</div>
+    <div class="price">${money(e.price)} <span class="muted">/ pupa</span></div>
+    ${own && UI.edit ? `<div class="edit-box">
+        <label class="f">Price (₱)<input type="number" min="0" step="0.5" value="${e.price}" data-chg="catPrice" data-sp="${esc(sp)}"></label>
+        <label class="f">Cost per pupa (₱, for profit reports)<input type="number" min="0" step="0.5" value="${e.cost || 0}" data-chg="catCost" data-sp="${esc(sp)}"></label>
+        <label class="cb"><input type="checkbox" ${e.flooded ? 'checked' : ''} data-chg="catFlood" data-sp="${esc(sp)}"> Flooded (pause sales)</label>
+        <label class="f">Butterfly photo<input type="file" accept="image/*" data-chg="catPhoto" data-sp="${esc(sp)}" data-kind="butterfly"></label>
+        <label class="f">Pupa photo<input type="file" accept="image/*" data-chg="catPhoto" data-sp="${esc(sp)}" data-kind="pupa"></label>
       </div>` : ''}
-    </div>`;
-  }).join('');
-  renderCart();
+    ${canOrder ? `<div class="row">
+        <input type="number" min="1" value="${UI.qty[i] || 1}" id="q${i}" data-chg="qty" data-i="${i}" style="width:84px;margin:0">
+        <button class="btn grow sm" data-act="addCart" data-b="${esc(b)}" data-s="${esc(sp)}" data-i="${i}">Add to cart</button>
+      </div>` : ''}
+    ${!canOrder && !own && e.flooded ? '<div class="muted">Not available right now</div>' : ''}
+  </div>`;
 }
-function setCatPrice(s, v) {
-  rpc('setCatalogItem', me, s, {price: Math.max(0, parseFloat(v) || 0)})
-    .then(() => { toast('Price updated'); loadAll(() => renderAll()); })
+function saveCat(sp, patch){
+  return api('setCatalogItem', sp, patch)
+    .then(() => { toast('Saved'); return refresh(); })
+    .then(renderLive)
     .catch(e => toast(errText(e)));
 }
-function setCatCost(s, v) {
-  rpc('setCatalogItem', me, s, {cost: Math.max(0, parseFloat(v) || 0)})
-    .then(() => { toast('Cost saved'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function setCatFlood(s, f) {
-  rpc('setCatalogItem', me, s, {flooded: f})
-    .then(() => { toast(f ? sp(s) + ' flagged as flooded' : 'Flood flag cleared'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function setImg(s, kind, input) {
-  const f = input.files[0]; if (!f) return;
-  const reader = new FileReader(), im = new Image();
+function uploadPhoto(sp, kind, file){
+  if (!file) return;
+  const reader = new FileReader();
   reader.onload = () => {
+    const im = new Image();
     im.onload = () => {
       const k = Math.min(1, 800 / Math.max(im.width, im.height));
       const c = document.createElement('canvas');
       c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
       c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-      const dataUrl = c.toDataURL('image/jpeg', 0.85), key = s + '|' + kind;
-      toast('Uploading to Drive…');
-      rpc('saveMedia', me, key, dataUrl)
-        .then(res => { S.media[key] = res.url; renderMarket(); toast('Photo saved'); })
-        .catch(e => toast('Photo failed: ' + errText(e)));
+      toast('Uploading photo…');
+      api('saveMedia', sp + '|' + kind, c.toDataURL('image/jpeg', 0.85))
+        .then(res => { MEDIA[sp + '|' + kind] = res.url; toast('Photo saved'); renderMarket(); })
+        .catch(e => toast(errText(e)));
     };
     im.src = reader.result;
   };
-  reader.readAsDataURL(f);
-}
-function addToCart(b, s, i) {
-  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
-  if (floodedFor(b, s)) return;
-  const q = Math.max(1, parseInt($('qty' + i).value, 10) || 1), k = b + '|' + s;
-  cart[k] = (cart[k] || 0) + q;
-  renderCart(); toggleCart(true);
-}
-function removeFromCart(k) { delete cart[k]; renderCart(); }
-function renderCart() {
-  Object.keys(cart).forEach(k => { const [b, s] = k.split('|'); if (floodedFor(b, s)) delete cart[k]; });
-  let total = 0, count = 0, h = '';
-  Object.keys(cart).forEach(k => {
-    const [b, s] = k.split('|'), price = itemOf(b, s).price, line = cart[k] * price;
-    total += line; count += cart[k];
-    h += `<div class="item row" style="justify-content:space-between"><span>${esc(sp(s))}<br><small class="muted">${esc((S.users[b] || {}).name || b)} · ${cart[k]} × ₱${Number(price).toFixed(2)}</small></span>
-      <span>₱${line.toFixed(2)} <button class="ghost" style="padding:4px 9px" onclick="removeFromCart('${esc(k)}')">✕</button></span></div>`;
-  });
-  $('cartItems').innerHTML = h || emptyBox('🛒', 'Your cart is empty.');
-  $('cartTotal').textContent = total.toFixed(2);
-  $('cartCount').textContent = count;
-  $('checkoutBtn').disabled = !count;
-}
-function toggleCart(open) { $('cart').classList.toggle('hide', !open); }
-function checkout() {
-  if (!me) { toast('Please log in on the Home page to check out.'); toggleCart(false); showView('home'); return; }
-  const items = Object.keys(cart).map(k => { const [b, s] = k.split('|'); return {breeder: b, sp: s, qty: cart[k]}; });
-  if (!items.length) return toast('Your cart is empty.');
-  rpc('placeOrder', me, items)
-    .then(() => {
-      cart = {}; renderCart(); toggleCart(false);
-      toast('Order placed! The sellers have been notified.');
-      loadAll(() => renderAll());
-    })
-    .catch(e => toast(errText(e)));
+  reader.readAsDataURL(file);
 }
 
-// ===== SALES RECORD =====
-function renderSales() {
-  const box = $('salesBody'); if (!box) return;
-  const rows = S.salesRecord || [];
-  const who = x => isAdmin() ? x.breeder + ' → ' + x.buyer
-    : isBreeder() ? 'Buyer: ' + x.buyerName
-    : 'Seller: ' + x.sellerName;
-  box.innerHTML = rows.map(x => `<tr><td>${esc(fmtDate(x.date))}</td><td>${esc(x.id)}</td><td>${esc(sp(x.sp))}</td>
-    <td>${x.qty}</td><td>${money(x.price)}</td><td>${money(x.total)}</td><td>${esc(who(x))}</td></tr>`).join('')
-    || '<tr><td colspan="7" class="muted">No completed sales yet.</td></tr>';
-  if (typeof Chart === 'undefined' || !$('salesChart')) return;
-  const bySp = {};
-  rows.forEach(x => { bySp[x.sp] = (bySp[x.sp] || 0) + x.qty; });
-  const labels = Object.keys(bySp);
-  if (chart) chart.destroy();
-  chart = new Chart($('salesChart'), {
-    type: 'bar',
-    data: {labels: labels.map(sp), datasets: [{label: 'Pupae', data: labels.map(l => bySp[l]), backgroundColor: '#5b3fd0', borderRadius: 8}]},
-    options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true, ticks: {precision: 0}}}}
-  });
+/* =====================================================================
+   CART & CHECKOUT
+   ===================================================================== */
+function cartCount(){ return Object.values(UI.cart).reduce((a, n) => a + n, 0); }
+function renderCartBadge(){
+  $('cartN').textContent = cartCount();
+  if (UI.sheetKind === 'cart') $('shB').innerHTML = cartHTML();
 }
-function salesCard() {
-  if (!me || ['breeder', 'buyer', 'purchaser', 'admin'].indexOf(roleOf()) < 0) return '';
-  const title = isAdmin() ? '📈 All sales records' : isBreeder() ? '📈 My sales record' : '🧾 My purchase record';
-  const last = isAdmin() ? 'Breeder → Buyer' : isBreeder() ? 'Buyer' : 'Seller';
-  return `<div class="card"><h3>${title}</h3>
-    <div class="tw"><table><thead><tr><th>Date</th><th>Order</th><th>Species</th><th>Qty</th><th>Price</th><th>Total</th><th>${last}</th></tr></thead>
-    <tbody id="salesBody"></tbody></table></div>
-    <canvas id="salesChart" height="140"></canvas></div>`;
+function cartHTML(){
+  const keys = Object.keys(UI.cart).filter(k => {
+    const [b, s] = k.split('|');
+    return !flooded(b, s) && S.users[b];
+  });
+  if (!keys.length) return empty('🛒', 'Your cart is empty.');
+  let total = 0;
+  const rows = keys.map(k => {
+    const [b, s] = k.split('|'), price = priceOf(b, s), line = price * UI.cart[k];
+    total += line;
+    return `<div class="li row between">
+      <div><b>${esc(pname(s))}</b><div class="muted">${esc(nameOf(b))} · ${UI.cart[k]} × ${money(price)}</div></div>
+      <div class="row"><b>${money(line)}</b><button class="ghost sm danger" data-act="cartRemove" data-k="${esc(k)}">✕</button></div>
+    </div>`;
+  }).join('');
+  return `${rows}
+    <div class="row between" style="margin-top:14px"><b>Total</b><b class="price">${money(total)}</b></div>
+    <p class="muted">Pay each seller directly via GCash after you place the order.</p>
+    <button class="btn block" data-act="checkout">Place order</button>`;
 }
 
-// ===== PUPAE TAB =====
-function profileOf(u) {
-  return {name: u.name, phone: u.phone, email: u.email, organization: u.org, address: u.address, gcash: u.gcash};
-}
-function renderPupaeShell() {
-  const u = myUser();
-  if (posts()) {
-    const opts = Object.keys(SPECIES).map(s =>
-      `<option value="${s}" ${floodedFor(me, s) ? 'disabled' : ''}>${esc(sp(s))} — ₱${Number(itemOf(me, s).price).toFixed(2)}${floodedFor(me, s) ? ' (flooded)' : ''}</option>`).join('');
-    $('vPupae').innerHTML = `
-      <div class="card"><h3>🐛 Post Fresh Pupae</h3>
-        <label>Your GCash number<input id="bGcash" type="tel" value="${esc(u.gcash || '')}"></label>
-        <label>Species<select id="bSp" onchange="updPostPrice()">${opts}</select></label>
-        <p class="muted" id="bPriceInfo" style="margin:-6px 0 12px"></p>
-        <label>Exact number of pupae<input id="bQty" type="number" min="1"></label>
-        <p class="muted"><b>Quality assurance (export grade) – all required</b></p>
-        ${QA.map(q => `<label style="display:flex;gap:8px;font-weight:600;align-items:flex-start"><input type="checkbox" class="qa" style="width:auto;margin:3px 0 0"> ${q}</label>`).join('')}
-        <label>QA notes (optional)<input id="bNotes"></label>
-        <p class="note" id="bMsg"></p>
-        <button class="btn" onclick="postLot()">Post Fresh Pupae (valid 2 days)</button>
+/* =====================================================================
+   PUPAE (breeders post; buyers order)
+   ===================================================================== */
+function renderPupae(){
+  const el = $('vPupae');
+  if (isBreeder()) {
+    el.innerHTML = `
+      <div class="card">
+        <div class="card-h"><h3>🐛 Post fresh pupae</h3></div>
+        <p class="muted">Posted pupae are sold for 2 days. After that they can no longer be sold.</p>
+        ${!mine().gcash ? '<div class="alert">Add your GCash number in More → Profile before posting.</div>' : ''}
+        <label class="f">Species
+          <select id="pSp">${SP_KEYS.map(s => `<option value="${esc(s)}" ${flooded(me, s) ? 'disabled' : ''}>${esc(pname(s))} — ${money(priceOf(me, s))}${flooded(me, s) ? ' (flooded)' : ''}</option>`).join('')}</select></label>
+        <label class="f">Exact number of pupae<input id="pQty" type="number" min="1"></label>
+        <div class="h4">Quality assurance (export grade) — all required</div>
+        ${QA.map(q => `<label class="cb"><input type="checkbox" class="qa"> ${q}</label>`).join('')}
+        <label class="f" style="margin-top:10px">Notes (optional)<input id="pNote"></label>
+        <p class="note" id="pMsg"></p>
+        <button class="btn block" data-act="postLot">Post pupae for sale</button>
       </div>
-      <div class="card"><h3>📦 My Listings</h3><div class="tw" id="lotList"></div></div>
-      <div class="card"><h3>💬 My Orders</h3><div id="orderList"></div></div>`;
-    updPostPrice();
+      <div class="card"><div class="card-h"><h3>📦 My listings</h3></div><div id="pLists"></div></div>
+      <div class="card"><div class="card-h"><h3>🧾 Orders</h3></div><div id="pOrders"></div></div>`;
   } else {
-    $('vPupae').innerHTML = `
-      <div class="card"><h3>🐛 Fresh Pupae for Sale</h3>
-        <p class="muted">Export-grade pupae passed by the breeder's quality assurance. Listings expire after 2 days.</p>
-        <div id="lotList" class="grid"></div></div>
-      <div class="card"><h3>🧾 My Orders</h3><div id="orderList"></div></div>`;
+    el.innerHTML = `
+      <div class="card">
+        <div class="card-h"><h3>🦋 Fresh pupae for sale</h3></div>
+        <p class="muted">Export-grade pupae that passed the breeder's quality checks. Listings expire 2 days after posting.</p>
+        <div class="species" id="pLists"></div>
+      </div>
+      <div class="card"><div class="card-h"><h3>🧾 My orders</h3></div><div id="pOrders"></div></div>`;
   }
-  renderLots(); renderOrders();
+  renderPupaeLists();
 }
-function updPostPrice() {
-  const el = $('bPriceInfo'), s = $('bSp').value;
-  if (!el) return;
-  el.textContent = floodedFor(me, s)
-    ? '⛔ This species is flooded. Turn off the flag in Manage prices (Market tab) before posting.'
-    : 'Catalog price: ₱' + Number(itemOf(me, s).price).toFixed(2) + ' per pupa. Change it in Manage prices.';
-  el.className = floodedFor(me, s) ? 'note' : 'muted';
+function lotCard(l){
+  const c = SPECIES[l.sp] || ['#222','#fff'];
+  return `<div class="sp">
+    <div class="art"><figure>${pupaSVG(c)}<br>Pupa</figure></div>
+    <div class="row between"><b>${esc(pname(l.sp))}</b><span class="badge g">QA PASSED</span></div>
+    <div class="price">${money(l.price)} <span class="muted">/ pupa</span></div>
+    <div class="muted">${l.left} available · ${esc(nameOf(l.breeder))}<br>⏳ ${timeLeft(l.exp)}</div>
+    <div class="row">
+      <input type="number" min="1" max="${l.left}" value="1" id="oq${l.id}" style="width:84px;margin:0">
+      <button class="btn grow sm" data-act="lotBuy" data-id="${esc(l.id)}">Order</button>
+    </div>
+  </div>`;
 }
-function postLot() {
-  const m = t => { $('bMsg').textContent = t; $('bMsg').className = 'note'; };
-  const g = $('bGcash').value.replace(/\s/g, ''), spc = $('bSp').value;
-  const qty = parseInt($('bQty').value, 10);
-  if (!/^\+?\d{10,13}$/.test(g)) return m('Enter your GCash number so purchasers can pay you.');
-  if (!(qty >= 1)) return m('Enter the exact number of pupae.');
-  if ([...document.querySelectorAll('.qa')].some(c => !c.checked)) return m('Complete every quality assurance check first.');
-  if (floodedFor(me, spc)) return m('This species is flooded and cannot be posted.');
-  rpc('updateOwnProfile', me, Object.assign(profileOf(myUser()), {gcash: g})).catch(() => {});
-  rpc('postFreshPupae', me, {sp: spc, qty: qty, notes: $('bNotes').value.trim(), qaPassed: true})
-    .then(lot => {
-      $('bQty').value = ''; $('bNotes').value = '';
-      document.querySelectorAll('.qa').forEach(c => c.checked = false);
-      $('bMsg').textContent = 'Posted at ₱' + Number(lot.price).toFixed(2) + ' per pupa. Listing expires in 2 days.';
-      $('bMsg').className = 'ok';
-      loadAll(() => renderAll());
-    })
-    .catch(e => m(errText(e)));
-}
-function renderLots() {
-  const box = $('lotList'); if (!box) return;
-  if (posts()) {
-    const mine = S.lots.filter(l => l.breeder === me).sort((a, b) => b.created - a.created);
-    box.innerHTML = mine.length ? `<table><thead><tr><th>Species</th><th>Left / Posted</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody>` +
-      mine.map(l => {
-        const st = Date.now() >= l.exp ? '<span class="chip">Expired</span>'
-          : floodedFor(l.breeder, l.sp) ? '<span class="chip bad">Flooded – paused</span>'
-          : l.left > 0 ? '<span class="chip ok">For sale · ' + timeLeft(l) + '</span>' : '<span class="chip">Sold out</span>';
-        return `<tr><td>${esc(sp(l.sp))}</td><td>${l.left} / ${l.qty}</td><td>₱${Number(l.price).toFixed(2)}</td>
-        <td>${st}</td>
-        <td>${l.left > 0 && Date.now() < l.exp ? `<button class="ghost" onclick="editLeft('${l.id}')">Set count</button> <button class="ghost" onclick="withdraw('${l.id}')">Withdraw</button>` : ''}</td></tr>`;
-      }).join('') + '</tbody></table>' : emptyBox('📦', 'No listings yet. Post your first fresh batch above.');
+function renderPupaeLists(){
+  const pl = $('pLists'), po = $('pOrders');
+  if (!pl || !po) return;
+  if (isBreeder()) {
+    const L = S.lots.filter(l => l.breeder === me).sort((a, b) => b.created - a.created);
+    pl.innerHTML = L.length ? `<div class="tbl-wrap"><table>
+      <thead><tr><th>Species</th><th>Left / posted</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody>
+      ${L.map(l => {
+        const status = Date.now() >= l.exp ? '<span class="chip">Expired</span>'
+          : flooded(me, l.sp) ? '<span class="chip bad">Flooded – paused</span>'
+          : l.left > 0 ? `<span class="chip ok">For sale · ${timeLeft(l.exp)}</span>` : '<span class="chip">Sold out</span>';
+        const act = (l.left > 0 && Date.now() < l.exp) ? `<button class="ghost sm" data-act="lotCount" data-id="${esc(l.id)}">Set count</button>` : '';
+        return `<tr><td>${esc(pname(l.sp))}</td><td>${l.left} / ${l.qty}</td><td>${money(l.price)}</td><td>${status}</td><td>${act}</td></tr>`;
+      }).join('')}</tbody></table></div>`
+      : empty('📦', 'No listings yet. Post your first batch above.');
+    po.innerHTML = ordersHTML(S.orders.filter(o => o.breeder === me));
   } else {
-    const av = S.lots.filter(liveLot).sort((a, b) => b.created - a.created);
-    box.innerHTML = av.map(l => `<div class="sp"><div class="row" style="justify-content:space-between"><h3 style="margin:0;font-size:1rem">${esc(sp(l.sp))}</h3><span class="badge g">QA PASSED</span></div>
-      <div class="price">₱${Number(l.price).toFixed(2)} <span class="muted">/ pupa</span></div>
-      <p class="muted" style="margin:0">${l.left} available · ${esc((S.users[l.breeder] || {}).name || l.breeder)}<br>⏳ ${timeLeft(l)}${l.notes ? '<br>' + esc(l.notes) : ''}</p>
-      <div class="row"><input type="number" min="1" max="${l.left}" value="1" id="oq${l.id}" style="width:80px;margin:0"><button class="btn" style="width:auto" onclick="orderLot('${l.id}')">Order</button></div></div>`).join('')
-      || emptyBox('🦋', 'No fresh pupae for sale right now. Check back soon.');
+    const open = S.lots.filter(lotOpen).sort((a, b) => b.created - a.created);
+    pl.innerHTML = open.length ? open.map(lotCard).join('') : empty('🦋', 'No fresh pupae for sale right now. Check back soon.');
+    po.innerHTML = ordersHTML(S.orders.filter(o => o.buyer === me));
   }
 }
-function orderLot(id) {
-  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
-  const l = S.lots.find(x => x.id === id), q = parseInt($('oq' + id).value, 10);
-  if (!l) return toast('This listing is no longer available.');
-  rpc('placeOrder', me, [{breeder: l.breeder, sp: l.sp, qty: q, lotId: id}])
-    .then(() => { toast('Order placed! Check My Orders.'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function renderOrders() {
-  const box = $('orderList'); if (!box) return;
-  const list = S.orders.filter(o => o.buyer === me || o.breeder === me).sort((a, b) => b.created - a.created);
-  box.innerHTML = list.map(o => {
-    const asBuyer = o.buyer === me;
+function ordersHTML(list){
+  const L = [...list].sort((a, b) => b.created - a.created);
+  if (!L.length) return empty('🧾', 'No orders yet.');
+  return L.map(o => {
+    const buyerSide = o.buyer === me, seller = S.users[o.breeder] || {};
     let act = '';
-    if (asBuyer && o.status === 'Awaiting Payment') {
-      const gc = (S.users[o.breeder] || {}).gcash || 'the seller';
-      act = `<p class="muted">💙 Send <b>${money(o.total)}</b> via GCash to <b>${esc(gc)}</b>, then enter the reference number:</p>
-        <div class="row"><input id="pr${o.id}" inputmode="numeric" placeholder="GCash reference no." style="flex:1;margin:0"><button class="btn" style="width:auto" onclick="confirmPay('${o.id}')">I've Paid</button><button class="ghost" onclick="cancelOrder('${o.id}')">Cancel</button></div>`;
-    } else if (asBuyer && o.status === 'Paid – Awaiting Receipt') {
-      act = '<p class="muted">Payment submitted. Waiting for the seller to confirm.</p>';
+    if (buyerSide && o.status === 'Awaiting Payment') {
+      act = `<div class="alert">💙 Send <b>${money(o.total)}</b> via GCash to <b>${esc(seller.gcash || 'the seller')}</b>, then enter the reference number.</div>
+        <div class="row">
+          <input id="pr_${esc(o.id)}" inputmode="numeric" placeholder="GCash reference no." class="grow" style="margin:0">
+          <button class="btn sm" data-act="orderPay" data-id="${esc(o.id)}">I've paid</button>
+          <button class="ghost sm danger" data-act="orderAct" data-id="${esc(o.id)}" data-do="cancel">Cancel</button>
+        </div>`;
+    } else if (buyerSide && o.status === PAID) {
+      act = '<p class="muted">Payment submitted. Waiting for the seller to confirm receipt.</p>';
+    } else if (!buyerSide && o.status === PAID) {
+      act = `<button class="btn sm" data-act="orderAct" data-id="${esc(o.id)}" data-do="received">Payment received – mark complete</button>`;
+    } else if (!buyerSide && o.status === 'Awaiting Payment') {
+      act = `<button class="ghost sm danger" data-act="orderAct" data-id="${esc(o.id)}" data-do="cancel">Cancel order</button>`;
     }
-    if (!asBuyer && o.status === 'Paid – Awaiting Receipt') act = `<button class="btn" onclick="markReceived('${o.id}')">Payment received – mark complete</button>`;
-    if (!asBuyer && o.status === 'Awaiting Payment') act = `<button class="ghost" onclick="cancelOrder('${o.id}')">Cancel order</button>`;
-    const contact = asBuyer
-      ? `Seller: ${esc(o.sellerName)}${o.sellerPhone ? ' · ' + esc(o.sellerPhone) : ''}`
-      : `Buyer: ${esc(o.buyerName)} · ${esc(o.buyerPhone)}${o.buyerEmail ? ' · ' + esc(o.buyerEmail) : ''}<br>📍 ${esc(o.buyerAddress)}`;
-    return `<div class="item"><div class="row" style="justify-content:space-between"><b>${esc(o.id)}</b>${chip(o.status)}</div>
-      <div>${esc(sp(o.sp))} × ${o.qty} · <b>${money(o.total)}</b></div>
-      <span class="muted">${contact}${o.payRef ? ' · GCash ref ' + esc(o.payRef) : ''}</span>${act ? '<div style="margin-top:8px">' + act + '</div>' : ''}</div>`;
-  }).join('') || emptyBox('🧾', 'No orders yet.');
-}
-function confirmPay(id) {
-  const v = $('pr' + id).value.replace(/\s/g, '');
-  rpc('updateOrder', me, id, 'submitPay', {payRef: v})
-    .then(() => { toast('Payment submitted. The seller will confirm it.'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function cancelOrder(id) {
-  if (!confirm('Cancel this order?')) return;
-  rpc('updateOrder', me, id, 'cancel', {})
-    .then(() => { toast('Order cancelled'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function markReceived(id) {
-  rpc('updateOrder', me, id, 'received', {})
-    .then(() => { toast('Marked as received'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function editLeft(id) {
-  const l = S.lots.find(x => x.id === id);
-  const n = parseInt(prompt('Exact number of pupae still available:', l.left), 10);
-  if (!(n >= 0)) return;
-  rpc('setLotLeft', me, id, n)
-    .then(() => { toast('Count updated'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function withdraw(id) {
-  if (!confirm('Withdraw the remaining pupae from sale?')) return;
-  rpc('setLotLeft', me, id, 0)
-    .then(() => { toast('Listing withdrawn'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
+    const contact = buyerSide
+      ? `Seller: ${esc(o.sellerName || '')}${o.sellerPhone ? ' · ' + esc(o.sellerPhone) : ''}`
+      : `Buyer: ${esc(o.buyerName || '')}${o.buyerPhone ? ' · ' + esc(o.buyerPhone) : ''}${o.buyerAddress ? '<br>📍 ' + esc(o.buyerAddress) : ''}`;
+    return `<div class="li">
+      <div class="row between"><b>${esc(o.id)}</b>${chip(o.status)}</div>
+      <div>${esc(pname(o.sp))} × ${o.qty} · <b>${money(o.total)}</b></div>
+      <div class="muted">${contact}${o.payRef ? ' · GCash ref ' + esc(o.payRef) : ''}</div>
+      ${act ? `<div style="margin-top:8px">${act}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
-// ===== FARM VISITS =====
-function initVisits() {
-  const sel = $('rFarm'); if (!sel) return;
-  const names = allFarmNames();
-  if (sel.options.length !== names.length) {
-    const keep = sel.value;
-    sel.innerHTML = names.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
-    if (names.indexOf(keep) > -1) sel.value = keep;
-    if (!$('rDate').min) $('rDate').min = tomorrow();
-    if (!$('rDate').value) $('rDate').value = tomorrow();
-    farmChanged();
-  }
-  if (me) {
-    const u = myUser();
-    if (!$('rName').value) $('rName').value = u.name || '';
-    if (!$('rPhone').value) $('rPhone').value = u.phone || '';
-    if (!$('rEmail').value) $('rEmail').value = u.email || '';
-  }
-}
-function farmChanged() {
-  selSlot = '';
-  const f = farm(), i = farmInfo(f);
-  $('farmInfo').innerHTML = `📍 ${esc(i.loc)} · <a href="https://www.google.com/maps?q=${i.ll[0]},${i.ll[1]}" target="_blank" rel="noopener">map</a><br>🕐 ${esc(i.h)} · 📞 ${esc(i.tel)}<br>💰 ₱${fp(f)} per person · 👥 up to ${fc(f)} per slot<br>🎯 ${esc(i.sp.join(', '))}`;
-  $('rN').max = fc(f);
-  renderSlots();
-}
-function renderSlots() {
-  const box = $('slots'); if (!box || !$('rFarm').value) return;
-  const f = farm(), date = $('rDate').value, g = nVis();
-  const seats = capOn(f, date);
-  const closed = (S.park.closed || []).indexOf(date) > -1 || seats <= 0;
-  box.innerHTML = '';
-  if (closed) { box.innerHTML = '<span class="note">Closed on this date. Please choose another.</span>'; selSlot = ''; }
-  else SLOTS.forEach(s => {
-    const left = seats - booked(f, date, s), b = document.createElement('button');
-    b.className = 'slot' + (selSlot === s ? ' sel' : '');
-    b.disabled = left <= 0 || g > left || g < 1;
-    b.innerHTML = `${s}<br><small>${Math.max(left, 0)} seat(s) left</small>`;
-    b.onclick = () => { selSlot = s; renderSlots(); };
-    box.appendChild(b);
-  });
-  if (selSlot && (closed || seats - booked(f, date, selSlot) < g)) selSlot = '';
-  $('rTotal').textContent = (g * fp(f)).toFixed(2);
-}
-function reserve() {
-  if (!me) { toast('Please log in on the Home page first.'); showView('home'); return; }
-  const data = {
-    farm: farm(), date: $('rDate').value, n: nVis(), slot: selSlot,
-    name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim(),
-    purpose: $('rPurpose').value, notes: $('rNotes').value.trim(), terms: $('rTerms').checked
-  };
-  $('rMsg').className = 'muted';
-  $('rMsg').textContent = 'Checking seats…';
-  rpc('requestReservation', me, data).then(res => {
-    $('rMsg').className = res.status === 'Full' ? 'note' : 'ok';
-    $('rMsg').textContent = res.message;
-    toast(res.status === 'Full' ? 'Sorry, that slot is full' : 'Request sent to the farm owner');
-    selSlot = ''; $('rNotes').value = ''; $('rTerms').checked = false;
-    loadAll(() => renderAll());
-  }).catch(e => { $('rMsg').className = 'note'; $('rMsg').textContent = errText(e); });
-}
-function showPay(ref) {
-  const r = S.reservations.find(x => x.ref === ref); if (!r) return;
-  const box = $('payBox'); box.classList.remove('hide');
-  box.innerHTML = `<h3 style="margin-top:0">💙 Pay with GCash – ${esc(r.ref)}</h3>
-    <p>Your booking is approved. ${esc(r.farm)}<br>${esc(r.date)}, ${esc(r.slot)} · ${r.n} visitor(s)</p>
-    <p>Amount: <b>${money(r.total)}</b></p>
-    <p>Send to: <b>${esc(S.park.gNo || 'the farm (ask via messages)')}</b>${S.park.gName ? ' · ' + esc(S.park.gName) : ''}</p>
-    <p class="muted">Open GCash → Send Money → enter the amount above, then type the 13-digit reference number from your receipt.</p>
-    <div class="row"><input type="text" id="payRef" inputmode="numeric" placeholder="GCash reference no." style="flex:1;margin:0"><button class="btn" style="width:auto" onclick="submitPay('${r.ref}')">I've Paid</button></div>
-    <p id="payMsg" class="note"></p>`;
-  box.scrollIntoView({behavior: 'smooth'});
-}
-function submitPay(ref) {
-  const v = $('payRef').value.replace(/\s/g, '');
-  rpc('updateReservation', me, ref, 'submitPay', {payRef: v}).then(res => {
-    $('payBox').innerHTML = `<h3 style="margin-top:0" class="ok">Payment submitted ✔</h3><p>${esc(res.message)}</p>`;
-    loadAll(() => renderAll());
-  }).catch(e => { $('payMsg').textContent = errText(e); });
-}
-function cancelBooking(ref) {
-  if (!confirm('Cancel this booking?')) return;
-  rpc('updateReservation', me, ref, 'cancel', {}).then(() => { toast('Booking cancelled'); loadAll(() => renderAll()); })
-    .catch(e => toast(errText(e)));
-}
-function renderRes() {
-  const table = $('resTable'); if (!table) return;
-  const tb = table.getElementsByTagName('tbody')[0];
-  const list = S.reservations.filter(r => me && r.user === me).sort((a, b) => (b.created || 0) - (a.created || 0));
-  tb.innerHTML = list.map(r => `<tr>
-    <td>${esc(r.ref)}</td><td>${esc(r.farm)}</td><td>${esc(r.date)}</td><td>${esc(r.slot)}</td><td>${r.n}</td>
-    <td>${money(r.total)}</td><td>${chip(r.status)}${r.note ? '<br><small class="muted">' + esc(r.note) + '</small>' : ''}</td>
-    <td>
-      <button class="ghost" style="padding:4px 9px;margin:2px" onclick="openThread('${r.ref}')">💬</button>
-      ${r.status === 'Pending Payment' ? `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="showPay('${r.ref}')">Pay</button>` : ''}
-      ${['Awaiting Approval','Pending Payment','Payment Submitted'].indexOf(r.status) > -1 ? `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="cancelBooking('${r.ref}')">Cancel</button>` : ''}
-    </td></tr>`).join('');
-  $('resHint').style.display = list.length ? 'none' : 'block';
-}
-
-// ===== FARM OWNER: ORDERS & SEATS =====
-function renderFarm() {
-  const box = $('vFarm');
-  if (!isOwner()) { box.innerHTML = emptyBox('🏡', 'The Orders panel is for farm owners.'); return; }
-  if (!$('farmShell')) {
-    box.innerHTML = `
-      <div class="card" id="farmShell">
-        <h3 id="farmName">🏡 My Farm</h3>
-        <p class="muted" id="farmMeta" style="margin-top:-6px"></p>
-        <div class="stats" id="farmStats"></div>
+/* =====================================================================
+   VISITS (visitors book farm slots)
+   ===================================================================== */
+function renderVisits(){
+  const el = $('vVisits');
+  if (isOwner() || isAdmin()) { el.innerHTML = `<div class="card">${empty('🎫', 'Staff manage bookings from the Bookings tab.')}</div>`; return; }
+  const names = farmNames();
+  if (!names.includes(UI.visit.farm)) UI.visit.farm = names[0] || '';
+  if (!UI.visit.date || UI.visit.date <= todayStr()) UI.visit.date = addDays(1);
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-h"><h3>🎫 Book a farm visit</h3></div>
+      <label class="f">Farm
+        <select data-chg="visitFarm">${names.map(f => `<option value="${esc(f)}" ${f === UI.visit.farm ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+      <div id="vInfo"></div>
+      <div class="g2">
+        <label class="f">Visit date<input type="date" min="${addDays(1)}" value="${UI.visit.date}" data-chg="visitDate"></label>
+        <label class="f">Number of visitors<input type="number" min="1" value="${UI.visit.n}" data-chg="visitN"></label>
       </div>
-      <div class="card"><h3>📩 Orders needing approval</h3><div id="farmPending"></div></div>
-      <div class="card"><h3>📋 Booking history</h3><div id="farmHistory"></div></div>
-      <div class="card"><h3>🌸 Seats per slot &amp; peak season</h3>
-        <p class="muted" style="margin-top:-6px">Set how many visitors each time slot accepts for a date range. Raise it for peak season and lower it afterwards. Set 0 to close the farm on those dates.</p>
-        <div id="capList"></div>
-        <div class="item">
-          <label>From<input type="date" id="capFrom"></label>
-          <label>To<input type="date" id="capTo"></label>
-          <label>Seats per slot<input type="number" min="0" max="500" id="capSeats"></label>
-          <label>Label (optional)<input id="capLabel" placeholder="e.g. Christmas peak"></label>
-          <p class="note" id="capMsg"></p>
-          <button class="btn" onclick="addCapRule()">Save seat rule</button>
-        </div>
-        <p class="muted" style="margin-top:12px">Next 14 days (booked / seats per slot)</p>
-        <div class="tw" id="capDays"></div>
-      </div>`;
+      <div class="h4">Time slot</div>
+      <div class="slots" id="vSlots"></div>
+      <div class="g2">
+        <label class="f">Purpose
+          <select id="vPurpose">${['Educational Tour','Photography','Research','School Field Trip','Family Outing','Other'].map(p => `<option>${p}</option>`).join('')}</select></label>
+        <label class="f">Contact name<input id="vName" value="${esc(mine().name || '')}"></label>
+      </div>
+      <div class="g2">
+        <label class="f">Phone<input id="vPhone" type="tel" value="${esc(mine().phone || '')}"></label>
+        <label class="f">Email<input id="vEmail" type="email" value="${esc(mine().email || '')}"></label>
+      </div>
+      <label class="f">Special requests<textarea id="vNotes" rows="2"></textarea></label>
+      <label class="cb"><input type="checkbox" id="vTerms"> I agree to the <a href="${LEGAL_URL}" target="_blank" rel="noopener">terms and conditions</a></label>
+      <div class="row between" style="margin:12px 0"><span class="muted">Estimated total</span><b class="price" id="vTotal">₱0.00</b></div>
+      <p class="note" id="vMsg"></p>
+      <button class="btn block" data-act="reserve">Send request</button>
+    </div>
+    <div class="card"><div class="card-h"><h3>📋 My bookings</h3></div><div id="vList"></div></div>`;
+  renderVisitInfo(); updateSlots(); renderVisitsLists();
+}
+function renderVisitInfo(){
+  const el = $('vInfo'); if (!el || !UI.visit.farm) return;
+  const i = farmInfo(UI.visit.farm);
+  el.innerHTML = `<div class="alert info">
+    📍 ${esc(i.loc)} · <a href="https://www.google.com/maps?q=${i.ll[0]},${i.ll[1]}" target="_blank" rel="noopener">Map</a><br>
+    🕐 ${esc(i.h)} · 📞 ${esc(i.tel)}<br>
+    💰 ${money(farmInfo(UI.visit.farm).p)} per person · 👥 up to ${i.c} per slot
+    ${i.sp.length ? '<br>🎯 ' + esc(i.sp.join(', ')) : ''}</div>`;
+}
+function updateSlots(){
+  const box = $('vSlots'), total = $('vTotal'); if (!box) return;
+  const f = UI.visit.farm, d = UI.visit.date, n = parseInt(UI.visit.n, 10) || 0;
+  if (total) total.textContent = money(farmInfo(f).p * n);
+  if (!f || !d) { box.innerHTML = '<span class="muted">Choose a farm and date to see availability.</span>'; return; }
+  if (d <= todayStr()) { box.innerHTML = '<span class="note">Choose a date from tomorrow onward.</span>'; return; }
+  if ((S.park.closed || []).includes(d) || capOn(f, d) <= 0) {
+    box.innerHTML = '<span class="note">The farm is closed on this date. Please choose another.</span>';
+    UI.visit.slot = ''; return;
   }
-  fillFarm();
+  box.innerHTML = SLOTS.map(s => {
+    const left = capOn(f, d) - booked(f, d, s);
+    const disabled = left <= 0 || n > left || n < 1;
+    return `<button class="slot ${UI.visit.slot === s ? 'on' : ''}" ${disabled ? 'disabled' : ''} data-act="pickSlot" data-s="${esc(s)}">
+      ${esc(s)}<br><small>${Math.max(left, 0)} seat(s) left</small></button>`;
+  }).join('');
 }
-function fillFarm() {
-  if (!$('farmShell')) return;
-  const f = myFarm(), info = farmInfo(f), base = fc(f), t0 = today();
-  const list = S.reservations.filter(r => r.farm === f).sort((a, b) => (b.created || 0) - (a.created || 0));
-  const actionable = ['Awaiting Approval', 'Pending Payment', 'Payment Submitted'];
-  const pending = list.filter(r => actionable.indexOf(r.status) > -1);
-  const history = list.filter(r => actionable.indexOf(r.status) < 0);
-
-  $('farmName').textContent = '🏡 ' + (f || 'Farm not assigned');
-  $('farmMeta').textContent = f ? (info.loc || '') + ' · ₱' + fp(f) + ' per person' : 'Ask an administrator to assign your farm.';
-  $('farmStats').innerHTML = [
-    ['Awaiting approval', list.filter(r => r.status === 'Awaiting Approval').length],
-    ['To confirm payment', list.filter(r => r.status === 'Pending Payment' || r.status === 'Payment Submitted').length],
-    ['Confirmed visitors (upcoming)', list.filter(r => r.status === 'Confirmed' && r.date >= t0).reduce((a, r) => a + r.n, 0)],
-    ['Base seats per slot', base]
-  ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
-
-  $('farmPending').innerHTML = pending.map(farmRow).join('') || emptyBox('✅', 'No requests waiting.');
-  $('farmHistory').innerHTML = history.map(farmRow).join('') || emptyBox('📭', 'No past bookings yet.');
-
-  const rules = (S.capRules || {})[f] || [];
-  $('capList').innerHTML = rules.length
-    ? rules.map((r, i) => `<div class="item row" style="justify-content:space-between">
-        <span><b>${esc(r.label || 'Seat rule')}</b><br><small class="muted">${esc(r.from)} → ${esc(r.to)} · ${r.cap === 0 ? 'CLOSED' : r.cap + ' seats per slot'}</small></span>
-        <button class="ghost" style="padding:4px 9px" onclick="removeCapRule(${i})">Remove</button></div>`).join('')
-    : `<p class="muted">Using the base capacity of ${base} seats per slot every day.</p>`;
-
-  const days = [];
-  for (let i = 0; i < 14; i++) days.push(ymd(new Date(Date.now() + i * 864e5)));
-  $('capDays').innerHTML = `<table><thead><tr><th>Date</th>${SLOTS.map(s => `<th>${esc(s.split(' - ')[0])}</th>`).join('')}</tr></thead><tbody>` +
-    days.map(d => {
-      const c = capOn(f, d);
-      return `<tr><td>${d}</td>` + SLOTS.map(s => `<td>${c <= 0 ? 'closed' : booked(f, d, s) + '/' + c}</td>`).join('') + '</tr>';
-    }).join('') + '</tbody></table>';
-}
-function farmRow(r) {
-  let acts = `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="openThread('${r.ref}')">💬</button>`;
-  if (r.status === 'Awaiting Approval') acts += `<button class="btn" style="width:auto;padding:6px 12px;margin:2px" onclick="ownerAct('${r.ref}','approve')">Approve</button>`;
-  if (r.status === 'Payment Submitted') acts += `<button class="btn" style="width:auto;padding:6px 12px;margin:2px" onclick="ownerAct('${r.ref}','confirm')">Confirm payment</button>`;
-  if (['Awaiting Approval', 'Pending Payment', 'Payment Submitted'].indexOf(r.status) > -1) acts += `<button class="ghost" style="padding:4px 9px;margin:2px" onclick="ownerAct('${r.ref}','reject')">Reject</button>`;
-  return `<div class="item">
-    <div class="row" style="justify-content:space-between"><b>${esc(r.ref)}</b>${chip(r.status)}</div>
-    <div>${esc(r.name)} · ${r.n} visitor(s)</div>
-    <span class="muted">${esc(r.date)} · ${esc(r.slot)}${r.phone ? ' · ' + esc(r.phone) : ''}${r.email ? ' · ' + esc(r.email) : ''}${r.payRef ? ' · GCash ' + esc(r.payRef) : ''}</span>
-    <div style="margin-top:8px">${acts}</div></div>`;
-}
-function addCapRule() {
-  const from = $('capFrom').value, to = $('capTo').value, seats = $('capSeats').value;
-  if (!from || !to || seats === '') { $('capMsg').className = 'note'; $('capMsg').textContent = 'Enter both dates and the seats per slot.'; return; }
-  const cur = ((S.capRules || {})[myFarm()] || []).slice();
-  cur.push({from: from, to: to, cap: parseInt(seats, 10), label: $('capLabel').value.trim()});
-  saveCapRules(cur);
-}
-function removeCapRule(i) {
-  const cur = ((S.capRules || {})[myFarm()] || []).slice();
-  cur.splice(i, 1);
-  saveCapRules(cur);
-}
-function saveCapRules(rules) {
-  const m = $('capMsg');
-  rpc('setFarmCapacity', me, myFarm(), rules).then(res => {
-    const w = res.warnings || [];
-    m.className = w.length ? 'note' : 'ok';
-    m.textContent = w.length
-      ? 'Saved. Warning: more visitors are already booked than the new limit on ' + w.join('; ')
-      : 'Seat rules saved.';
-    if (!w.length) { $('capFrom').value = ''; $('capTo').value = ''; $('capSeats').value = ''; $('capLabel').value = ''; }
-    toast('Seat rules saved');
-    loadAll(() => renderAll());
-  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
+function renderVisitsLists(){
+  const el = $('vList'); if (!el) return;
+  const L = S.reservations.filter(r => r.user === me).sort((a, b) => b.created - a.created);
+  el.innerHTML = L.length ? L.map(resCard).join('') : empty('🎫', 'You have no bookings yet.');
 }
 
-// ===== BOOKING MESSAGES =====
-function openThread(ref) {
-  threadRef = ref;
-  $('thTitle').textContent = 'Booking ' + ref;
-  $('thread').classList.remove('hide');
+/* =====================================================================
+   BOOKING CARDS (shared by visitors and farm staff)
+   ===================================================================== */
+function resCard(r){
+  const staff = isAdmin() || (isOwner() && r.farm === mine().farm);
+  const ref = esc(r.ref), acts = [`<button class="ghost sm" data-act="msg" data-ref="${ref}">💬 Messages</button>`];
+  if (staff) {
+    if (r.status === 'Awaiting Approval') acts.push(`<button class="btn sm" data-act="rsv" data-ref="${ref}" data-do="approve">Approve</button>`);
+    if (r.status === 'Payment Submitted') acts.push(`<button class="btn sm" data-act="rsv" data-ref="${ref}" data-do="confirm">Confirm payment</button>`);
+    if (ACTIVE_RES.includes(r.status)) acts.push(`<button class="ghost sm danger" data-act="rsv" data-ref="${ref}" data-do="reject">Reject</button>`);
+  }
+  if (r.user === me) {
+    if (r.status === 'Pending Payment') acts.push(`<button class="btn sm" data-act="openPay" data-ref="${ref}">Pay now</button>`);
+    if (ACTIVE_RES.includes(r.status)) acts.push(`<button class="ghost sm danger" data-act="rsv" data-ref="${ref}" data-do="cancel">Cancel</button>`);
+  }
+  return `<div class="li">
+    <div class="row between"><b>${ref}</b>${chip(r.status)}</div>
+    <div>${esc(r.name)} · ${r.n} visitor(s) · ${esc(r.farm)}</div>
+    <div class="muted">${esc(r.date)} · ${esc(r.slot)} · ${money(r.total)}${r.phone ? ' · ' + esc(r.phone) : ''}${r.payRef ? ' · GCash ' + esc(r.payRef) : ''}${r.note ? '<br>Note: ' + esc(r.note) : ''}</div>
+    <div class="row" style="margin-top:8px">${acts.join('')}</div>
+  </div>`;
+}
+
+/* =====================================================================
+   BOOKINGS (farm owners and admin)
+   ===================================================================== */
+function renderBookings(){
+  const el = $('vBookings');
+  if (!(isAdmin() || isOwner())) { el.innerHTML = `<div class="card">${empty('🏡', 'Bookings are for farm staff.')}</div>`; return; }
+  if (isOwner() && !mine().farm) { el.innerHTML = `<div class="card">${empty('🏡', 'No farm is assigned to your account yet. Ask the administrator.')}</div>`; return; }
+  if (isAdmin() && !UI.bFarm) UI.bFarm = '';
+  const f = bFarm();
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-h"><h3>📋 ${isOwner() ? esc(f) + ' · bookings' : 'All bookings'}</h3>
+        ${isAdmin() ? `<select data-chg="bFarm" style="width:auto;margin:0"><option value="">All farms</option>${farmNames().map(x => `<option value="${esc(x)}" ${x === UI.bFarm ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>` : ''}
+      </div>
+      <div class="seg">${[['active','Needs action'],['confirmed','Confirmed'],['all','All']].map(([k, l]) =>
+        `<button class="${UI.bFilter === k ? 'on' : ''}" data-act="bFilter" data-f="${k}">${l}</button>`).join('')}</div>
+      <div id="bList"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>🌸 Seats & peak season</h3></div>
+      ${f ? `<p class="muted" style="margin-top:-4px">Set how many visitors each slot accepts for a date range. Use 0 to close the farm on those dates.</p>
+        <div id="bRules"></div>
+        <div class="g2">
+          <label class="f">From<input type="date" id="stFrom"></label>
+          <label class="f">To<input type="date" id="stTo"></label>
+        </div>
+        <div class="g2">
+          <label class="f">Seats per slot<input type="number" id="stSeats" min="0" max="500"></label>
+          <label class="f">Label (optional)<input id="stLabel" placeholder="e.g. Christmas peak"></label>
+        </div>
+        <p class="note" id="stMsg"></p>
+        <button class="btn" data-act="addSeat">Save seat rule</button>`
+        : '<p class="muted">Choose a farm above to manage its seats.</p>'}
+    </div>
+    ${f ? `<div class="card"><div class="card-h"><h3>📅 Next 14 days</h3></div><div class="tbl-wrap" id="bGrid"></div></div>` : ''}`;
+  renderBookingsLists();
+}
+function renderBookingsLists(){
+  const bl = $('bList'); if (!bl) return;
+  const f = bFarm();
+  let L = S.reservations.filter(r => !f || r.farm === f);
+  if (UI.bFilter === 'active') L = L.filter(r => ACTIVE_RES.includes(r.status)).sort((a, b) => a.created - b.created);
+  else if (UI.bFilter === 'confirmed') L = L.filter(r => r.status === 'Confirmed').sort((a, b) => a.date < b.date ? -1 : 1);
+  else L = L.sort((a, b) => b.created - a.created);
+  bl.innerHTML = L.length ? L.map(resCard).join('') : empty('📭', 'Nothing to show in this view.');
+  if (!f) return;
+  const rules = S.capRules[f] || [];
+  const br = $('bRules');
+  if (br) br.innerHTML = rules.length
+    ? rules.map((r, i) => `<div class="li row between"><div><b>${esc(r.label || 'Seat rule')}</b>
+        <div class="muted">${esc(r.from)} → ${esc(r.to)} · ${r.cap === 0 ? 'CLOSED' : r.cap + ' seats per slot'}</div></div>
+        <button class="ghost sm danger" data-act="rmSeat" data-i="${i}">Remove</button></div>`).join('')
+    : `<p class="muted">Using the default of ${farmInfo(f).c} seats per slot every day.</p>`;
+  const g = $('bGrid');
+  if (g) {
+    const days = [...Array(14)].map((_, i) => addDays(i));
+    g.innerHTML = `<table><thead><tr><th>Date</th>${SLOTS.map(s => `<th>${esc(s.split(' - ')[0])}</th>`).join('')}</tr></thead><tbody>
+      ${days.map(d => {
+        const c = capOn(f, d);
+        return `<tr><td>${d}</td>${SLOTS.map(s => `<td>${c <= 0 ? '<span class="chip bad">closed</span>' : `${booked(f, d, s)} / ${c}`}</td>`).join('')}</tr>`;
+      }).join('')}</tbody></table>`;
+  }
+}
+function saveRules(f, rules){
+  return api('setFarmCapacity', f, rules)
+    .then(res => {
+      const w = res.warnings || [];
+      toast(w.length ? 'Saved. Over capacity on ' + w.slice(0, 3).join(', ') : 'Seat rules saved');
+      return refresh();
+    })
+    .then(renderBookings)
+    .catch(e => toast(errText(e)));
+}
+
+/* =====================================================================
+   MORE (profile, farm, admin, tools, legal)
+   ===================================================================== */
+function profileCard(){
+  const u = mine(), r = u.role;
+  return `<div class="card">
+    <div class="card-h"><h3>👤 ${esc(u.name || me)}</h3><span class="chip info">${esc(ROLE_NAME[r] || r)}</span></div>
+    <p class="muted" style="margin-top:-6px">@${esc(me)}${u.farm ? ' · 🏡 ' + esc(u.farm) : ''}${u.idType ? ' · 🪪 ' + esc(u.idType) : ''}</p>
+    <div class="g2">
+      <label class="f">Full name<input id="pfName" value="${esc(u.name || '')}"></label>
+      <label class="f">Phone<input id="pfPhone" type="tel" value="${esc(u.phone || '')}"></label>
+    </div>
+    <div class="g2">
+      <label class="f">Email<input id="pfEmail" type="email" value="${esc(u.email || '')}"></label>
+      <label class="f">${r === 'breeder' ? 'Farm / business name' : 'Organization (optional)'}<input id="pfOrg" value="${esc(u.org || '')}"></label>
+    </div>
+    <label class="f">Address<input id="pfAddr" value="${esc(u.address || '')}"></label>
+    ${r === 'breeder' ? `<label class="f">GCash number (receives buyer payments)<input id="pfGcash" type="tel" value="${esc(u.gcash || '')}"></label>` : ''}
+    <p class="note" id="pfMsg"></p>
+    <button class="btn" data-act="saveProfile">Save profile</button>
+  </div>`;
+}
+function saveProfile(){
+  const m = $('pfMsg');
+  const d = {name:$('pfName').value.trim(), phone:$('pfPhone').value.trim(), email:$('pfEmail').value.trim(),
+             organization:$('pfOrg').value.trim(), address:$('pfAddr').value.trim()};
+  if (isBreeder()) d.gcash = $('pfGcash').value.trim();
+  if (!d.name || d.phone.replace(/\D/g,'').length < 7) return setMsg(m, 'Name and a valid phone number are required.');
+  api('updateOwnProfile', d)
+    .then(() => { setMsg(m, 'Profile saved.', 'ok'); return refresh(); })
+    .then(renderHeader)
+    .catch(e => setMsg(m, errText(e)));
+}
+function passwordCard(){
+  return `<div class="card"><div class="card-h"><h3>🔑 Change password</h3></div>
+    <label class="f">Current password (or the temporary one from your administrator)<input id="pwOld" type="password" autocomplete="current-password"></label>
+    <div class="g2">
+      <label class="f">New password (8+ characters)<input id="pwNew" type="password" autocomplete="new-password"></label>
+      <label class="f">Confirm new password<input id="pwNew2" type="password" autocomplete="new-password"></label>
+    </div>
+    <p class="note" id="pwMsg"></p>
+    <button class="btn" data-act="changePwd">Save new password</button></div>`;
+}
+function farmCard(name, admin){
+  const i = farmInfo(name);
+  return `<div class="card">
+    <div class="card-h"><h3>🏡 Farm profile</h3>
+      ${admin ? `<select data-chg="aFarm" style="width:auto;margin:0">${farmNames().map(f => `<option value="${esc(f)}" ${f === name ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select>` : ''}
+    </div>
+    <p class="muted" style="margin-top:-6px">${admin ? 'Administrator edit.' : 'Changes appear to visitors immediately.'}</p>
+    <div class="g2">
+      <label class="f">Location<input id="fLoc" value="${esc(i.loc)}"></label>
+      <label class="f">Phone<input id="fTel" value="${esc(i.tel)}"></label>
+    </div>
+    <div class="g2">
+      <label class="f">Opening hours<input id="fHours" value="${esc(i.h)}"></label>
+      <label class="f">Price per person (₱)<input id="fP" type="number" min="0" value="${i.p}"></label>
+    </div>
+    <div class="g2">
+      <label class="f">Seats per slot (default)<input id="fC" type="number" min="1" max="500" value="${i.c}"></label>
+      <label class="f">Activities (comma separated)<input id="fSp" value="${esc(i.sp.join(', '))}"></label>
+    </div>
+    <div class="g2">
+      <label class="f">Map latitude<input id="fLat" value="${i.ll[0]}"></label>
+      <label class="f">Map longitude<input id="fLng" value="${i.ll[1]}"></label>
+    </div>
+    <p class="note" id="fMsg"></p>
+    <button class="btn" data-act="saveFarm" data-name="${esc(name)}" data-admin="${admin ? 1 : 0}">Save farm profile</button>
+  </div>`;
+}
+function parkCard(){
+  const p = S.park;
+  return `<div class="card"><div class="card-h"><h3>🏛 Park settings</h3></div>
+    <div class="g2">
+      <label class="f">GCash account name<input id="psName" value="${esc(p.gName || '')}"></label>
+      <label class="f">GCash number<input id="psNo" value="${esc(p.gNo || '')}"></label>
+    </div>
+    <div class="h4">Closed dates (all farms)</div>
+    <div class="row"><input type="date" id="psDate" class="grow" style="margin:0"><button class="ghost sm" data-act="addClosed">Add date</button></div>
+    <div class="row" style="margin:10px 0">${(p.closed || []).map(d =>
+      `<span class="chip bad">${esc(d)} <a href="#" data-act="rmClosed" data-d="${esc(d)}" style="color:inherit;margin-left:4px;text-decoration:none">✕</a></span>`).join('') || '<span class="muted">No closed dates.</span>'}</div>
+    <p class="note" id="psMsg"></p>
+    <button class="btn" data-act="savePark">Save park settings</button></div>`;
+}
+function adminCards(){
+  return `${parkCard()}
+    <div class="card">
+      <div class="card-h"><h3>🛡 User management</h3><button class="ghost sm" data-act="loadUsers">Load users</button></div>
+      <div id="uTable"><p class="muted">Load to view and edit accounts.</p></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>➕ Add farm owner</h3></div>
+      <div class="g2">
+        <label class="f">Username<input id="foUser" autocomplete="off"></label>
+        <label class="f">Temporary password<input id="foPass" type="password" autocomplete="new-password"></label>
+      </div>
+      <div class="g2">
+        <label class="f">Full name<input id="foName"></label>
+        <label class="f">Phone<input id="foPhone" type="tel"></label>
+      </div>
+      <div class="g2">
+        <label class="f">Email<input id="foEmail" type="email"></label>
+        <label class="f">Farm<select id="foFarm">${farmNames().map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')}</select></label>
+      </div>
+      <p class="note" id="foMsg"></p>
+      <button class="btn" data-act="createOwner">Create farm owner</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>📊 Quality survey (ISO/IEC 25010)</h3><button class="ghost sm" data-act="loadSurvey">Load results</button></div>
+      <div id="svRes"></div>
+    </div>
+    ${dashToken ? `<div class="card"><h3 style="margin:0 0 6px">📊 Admin dashboard</h3>
+      <p class="muted">Read-only view of orders, bookings, users and activity. The link expires after one hour.</p>
+      <a class="btn block" href="${esc(APPS_SCRIPT_URL)}?page=dashboard&token=${encodeURIComponent(dashToken)}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">Open dashboard</a></div>` : ''}`;
+}
+function classifyCard(){
+  return `<div class="card">
+    <div class="card-h"><h3>🔬 Quick identify</h3></div>
+    <p class="muted">Capture or upload a photo. The result is saved to the Butterfly Dataset on Google Drive in the matching label folder.</p>
+    <label class="f">What to identify
+      <select id="clsTask">${CLS_TASKS.map(t => `<option value="${t.v}">${esc(t.t)}</option>`).join('')}</select></label>
+    <div class="row">
+      <button class="btn grow" data-act="camOpen">📷 Camera</button>
+      <label class="ghost grow" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;font-weight:700;color:var(--b1)">📁 Upload
+        <input type="file" accept="image/*" hidden data-chg="clsFile"></label>
+    </div>
+    <div id="camBox" class="hide" style="margin-top:10px">
+      <video id="camV" autoplay playsinline muted style="width:100%;border-radius:14px;background:#000"></video>
+      <div class="row" style="margin-top:8px"><button class="btn grow" data-act="camShot">Capture</button><button class="ghost" data-act="camClose">Cancel</button></div>
+    </div>
+    <p class="note" id="clsMsg"></p>
+    <div id="clsOut"></div>
+    ${isAdmin() ? `<button class="ghost" style="width:100%;margin-top:8px" data-act="dsStatus">📁 Check dataset counts</button><div id="dsOut" style="margin-top:10px"></div>` : ''}
+  </div>`;
+}
+function salesRows(){
+  return S.salesRecord.filter(x => isAdmin() || (isBreeder() && x.breeder === me) || (isBuyer() && x.buyer === me));
+}
+function salesCard(){
+  const rows = salesRows(), admin = isAdmin(), breeder = isBreeder();
+  const who = x => admin ? esc(nameOf(x.breeder)) + ' → ' + esc(nameOf(x.buyer)) : breeder ? esc(nameOf(x.buyer)) : esc(nameOf(x.breeder));
+  return `<div class="card">
+    <div class="card-h"><h3>${admin ? '📈 All completed sales' : breeder ? '📈 My sales' : '🧾 My purchases'}</h3></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Date</th><th>Order</th><th>Species</th><th>Qty</th><th>Total</th><th>${admin ? 'Seller → buyer' : breeder ? 'Buyer' : 'Seller'}</th></tr></thead>
+      <tbody>${rows.map(x => `<tr><td>${esc(fmt(x.date))}</td><td>${esc(x.id)}</td><td>${esc(pname(x.sp))}</td><td>${x.qty}</td><td>${money(x.total)}</td><td>${who(x)}</td></tr>`).join('')
+        || '<tr><td colspan="6" class="muted">No completed transactions yet.</td></tr>'}</tbody>
+    </table></div>
+    ${admin || breeder ? `<div style="height:200px;margin-top:14px"><canvas id="salesChart"></canvas></div>
+      <div class="row" style="margin-top:12px"><button class="ghost" data-act="analytics">📊 Profit analytics</button></div>
+      <div id="anaBox"></div>` : ''}
+  </div>`;
+}
+function renderSalesChart(){
+  const c = $('salesChart');
+  if (!c || typeof Chart === 'undefined') return;
+  const by = {};
+  salesRows().forEach(x => { by[x.sp] = (by[x.sp] || 0) + x.qty; });
+  if (chartRef) chartRef.destroy();
+  chartRef = new Chart(c, {
+    type:'bar',
+    data:{labels:Object.keys(by).map(pname), datasets:[{label:'Pupae sold', data:Object.values(by), backgroundColor:'#7b3fe4', borderRadius:8}]},
+    options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}
+  });
+}
+function surveyCard(){
+  return `<div class="card"><div class="card-h"><h3>📝 Quality survey</h3></div>
+    <p class="muted">Two minutes, based on ISO/IEC 25010. Helps us improve the app.</p>
+    <button class="btn" data-act="openSurvey">Answer the survey</button></div>`;
+}
+function renderMore(){
+  const el = $('vMore');
+  if (!me) { el.innerHTML = `${legalCard()}${tourCard()}`; return; }
+  const r = role();
+  if (!UI.aFarm || !farmNames().includes(UI.aFarm)) UI.aFarm = farmNames()[0] || '';
+  let h = '';
+  if (mine().mustChange) h += `<div class="alert bad">🔐 Your administrator set a temporary password. Please choose your own password below to continue.</div>`;
+  h += profileCard() + passwordCard();
+  if (isAdmin()) {
+    h += farmCard(UI.aFarm, true) + adminCards();
+  } else if ((r === 'breeder' || r === 'farmowner') && mine().farm) {
+    h += farmCard(mine().farm, false);
+  }
+  if (isBreeder() || isAdmin()) h += classifyCard();
+  if (isBreeder() || isBuyer() || isAdmin()) h += salesCard();
+  if (!S.survey.done) h += surveyCard();
+  h += `${tourCard()}${legalCard()}
+    <div class="card"><button class="ghost" style="width:100%" data-act="logout">Log out</button></div>`;
+  el.innerHTML = h;
+  renderSalesChart();
+}
+function legalCard(){
+  return `<div class="card"><div class="card-h"><h3>⚖️ Legal</h3></div>
+    <p class="muted" style="margin-top:-6px">Terms of use, privacy policy and copyright notice.</p>
+    <div class="row">
+      <a class="ghost grow" style="text-align:center;padding:10px;border-radius:12px;text-decoration:none" href="${LEGAL_URL}" target="_blank" rel="noopener">Terms &amp; Conditions</a>
+      <a class="ghost grow" style="text-align:center;padding:10px;border-radius:12px;text-decoration:none" href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a>
+    </div>
+    <p class="muted" style="text-align:center;margin:12px 0 0">© 2026 Jerwin M. Montellano / LepVision. All rights reserved.</p></div>`;
+}
+
+/* =====================================================================
+   ADMIN ACTIONS: users, farms, park
+   ===================================================================== */
+function loadUsers(){
+  api('adminListUsers').then(list => {
+    UI.users = list;
+    $('uTable').innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>Role</th><th>Name</th><th>Farm</th><th></th></tr></thead>
+      <tbody>${list.map(u => `<tr>
+        <td>${esc(u.username)}</td><td>${esc(ROLE_NAME[u.role] || u.role)}</td><td>${esc(u.name)}</td><td>${esc(u.farm || '–')}</td>
+        <td><button class="ghost sm" data-act="editUser" data-u="${esc(u.username)}">Edit</button></td></tr>`).join('')}</tbody></table></div>`;
+  }).catch(e => toast(errText(e)));
+}
+function savePark(){
+  const m = $('psMsg');
+  api('saveState', {park:{gName:$('psName').value.trim(), gNo:$('psNo').value.trim(), closed:S.park.closed || []}})
+    .then(() => { toast('Park settings saved'); return refresh(); })
+    .then(renderMore)
+    .catch(e => setMsg(m, errText(e)));
+}
+function saveFarmProfile(name, d, asAdmin){
+  return asAdmin ? api('adminSaveFarm', name, d) : api('updateMyFarm', d);
+}
+
+/* =====================================================================
+   POPUP (buyers see new fresh pupae)
+   ===================================================================== */
+function checkPopup(){
+  if (!me || !isBuyer() || UI.sheetKind) return;
+  const seen = mine().seen || 0;
+  const fresh = S.lots.filter(l => lotOpen(l) && l.created > seen);
+  if (!fresh.length) return;
+  openSheet('🦋 Fresh pupae available!',
+    fresh.map(l => `<div class="li"><b>${esc(pname(l.sp))}</b> · ${l.left} pupae · ${money(l.price)} each
+      <div class="muted">${esc(nameOf(l.breeder))} · QA passed · ${timeLeft(l.exp)}</div></div>`).join('') +
+    `<p class="muted" style="margin-top:12px">Fresh pupae can only be sold for 2 days.</p>
+     <div class="row"><button class="btn grow" data-act="popupView">View &amp; buy</button><button class="ghost grow" data-act="closeSheet">Later</button></div>`,
+    'popup');
+}
+
+/* =====================================================================
+   SHEETS (modal panels)
+   ===================================================================== */
+function openSheet(title, html, kind){
+  UI.sheetKind = kind || '';
+  $('shT').textContent = title;
+  $('shB').innerHTML = html;
+  $('sheet').classList.remove('hide');
+}
+function closeSheet(){
+  const k = UI.sheetKind;
+  UI.sheetKind = ''; UI.threadRef = '';
+  $('sheet').classList.add('hide');
+  if (k === 'popup') api('markSeen', Date.now()).then(refresh).then(renderLive).catch(() => {});
+}
+function openCart(){ openSheet('🛒 Your cart', cartHTML(), 'cart'); }
+
+function openThread(ref){
+  UI.threadRef = ref;
+  openSheet('💬 Booking ' + ref, `
+    <div class="thread" id="thList"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="thText" placeholder="Type a message…" class="grow" style="margin:0" onkeydown="if(event.key==='Enter')sendThread()">
+      <button class="btn sm" data-act="thSend">Send</button>
+    </div>`, 'thread');
   loadThread();
 }
-function closeThread() { threadRef = null; $('thread').classList.add('hide'); }
-function loadThread() {
-  if (!threadRef) return;
-  const ref = threadRef;
-  rpc('getMessages', me, ref).then(list => {
-    if (threadRef !== ref) return;
-    $('thList').innerHTML = list.map(m => `<div class="msg"><small>${esc(fmtDate(m.time))} · ${esc(m.from)}</small><div>${esc(m.text)}</div></div>`).join('')
-      || '<p class="muted">No messages yet.</p>';
-    $('thList').scrollTop = $('thList').scrollHeight;
+function loadThread(){
+  const ref = UI.threadRef; if (!ref) return;
+  api('getMessages', ref).then(list => {
+    if (UI.threadRef !== ref || !$('thList')) return;
+    const box = $('thList');
+    box.innerHTML = list.length
+      ? list.map(m => `<div class="msg"><small>${esc(fmt(m.time))} · ${esc(m.from)}</small><div>${esc(m.text)}</div></div>`).join('')
+      : '<p class="muted">No messages yet. Start the conversation below.</p>';
+    box.scrollTop = box.scrollHeight;
   }).catch(e => toast(errText(e)));
 }
-function sendThread() {
-  const t = $('thText').value.trim();
-  if (!t || !threadRef) return;
-  rpc('sendMessage', me, threadRef, t).then(() => { $('thText').value = ''; loadThread(); })
+function sendThread(){
+  const t = $('thText').value.trim(), ref = UI.threadRef;
+  if (!t || !ref) return;
+  api('sendMessage', ref, t)
+    .then(() => { $('thText').value = ''; loadThread(); })
     .catch(e => toast(errText(e)));
 }
 
-// ===== ADMIN: BOOKINGS =====
-function renderOwnerPanel() {
-  const box = $('ownerBox'); if (!box || !isAdmin()) return;
-  const list = S.reservations.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
-  const rows = list.map(r => {
-    let acts = `<button class="ghost" style="padding:4px 8px;margin:2px" onclick="openThread('${r.ref}')">💬</button>`;
-    if (r.status === 'Awaiting Approval') acts += `<button class="btn" style="width:auto;padding:5px 10px;margin:2px" onclick="ownerAct('${r.ref}','approve')">Approve</button>`;
-    if (r.status === 'Payment Submitted') acts += `<button class="btn" style="width:auto;padding:5px 10px;margin:2px" onclick="ownerAct('${r.ref}','confirm')">Confirm payment</button>`;
-    if (['Awaiting Approval','Pending Payment','Payment Submitted'].indexOf(r.status) > -1) acts += `<button class="ghost" style="padding:4px 8px;margin:2px" onclick="ownerAct('${r.ref}','reject')">Reject</button>`;
-    return `<tr><td>${esc(r.ref)}<br><small class="muted">${esc(r.farm)}</small></td>
-      <td>${esc(r.name)}<br><small class="muted">${esc(r.phone)}${r.email ? '<br>' + esc(r.email) : ''}</small></td>
-      <td>${esc(r.date)}<br><small class="muted">${esc(r.slot)}</small></td>
-      <td>${r.n}</td><td>${chip(r.status)}${r.payRef ? '<br><small class="muted">GCash ' + esc(r.payRef) + '</small>' : ''}</td>
-      <td>${acts}</td></tr>`;
-  }).join('');
-  box.innerHTML = list.length
-    ? `<div class="tw"><table><thead><tr><th>Booking</th><th>Visitor</th><th>Date & time</th><th>Pax</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
-    : emptyBox('📭', 'No visit bookings yet.');
-}
-function ownerAct(ref, action) {
-  let data = {};
-  if (action === 'approve' && !confirm('Approve this visit? The visitor will be asked to pay via GCash.')) return;
-  if (action === 'confirm' && !confirm('Confirm that you received the GCash payment?')) return;
-  if (action === 'reject') {
-    const note = prompt('Reason (optional):', '');
-    if (note === null) return;
-    data = {note: note};
-  }
-  rpc('updateReservation', me, ref, action, data).then(res => {
-    toast('Booking is now: ' + res.status);
-    loadAll(() => renderAll());
-  }).catch(e => toast(errText(e)));
-}
-
-// ===== FARM PROFILE =====
-function farmEditorCard(name, asAdmin) {
-  const i = farmInfo(name);
-  return `<div class="card"><h3>🏡 Farm profile – ${esc(name)}</h3>
-    <p class="muted" style="margin-top:-6px">${asAdmin ? 'Admin edit.' : 'This is your designated farm. Changes show to visitors right away.'}</p>
-    <label>Location<input id="fe_loc" value="${esc(i.loc)}"></label>
-    <label>Phone<input id="fe_tel" value="${esc(i.tel)}"></label>
-    <label>Opening hours<input id="fe_hours" value="${esc(i.h)}"></label>
-    <label>Price per person (₱)<input id="fe_p" type="number" min="0" value="${i.p}"></label>
-    <label>Seats per time slot (default)<input id="fe_c" type="number" min="1" max="500" value="${i.c}"></label>
-    <label>Map latitude<input id="fe_lat" value="${i.ll[0]}"></label>
-    <label>Map longitude<input id="fe_lng" value="${i.ll[1]}"></label>
-    <label>Activities (comma separated)<input id="fe_sp" value="${esc(i.sp.join(', '))}"></label>
-    <p class="note" id="fe_msg"></p>
-    <button class="btn" onclick="saveFarmEditor('${esc(name)}', ${asAdmin ? 'true' : 'false'})">Save farm profile</button>
-  </div>`;
-}
-function saveFarmEditor(name, asAdmin) {
-  const g = id => $(id).value;
-  const d = {loc: g('fe_loc'), tel: g('fe_tel'), hours: g('fe_hours'), p: g('fe_p'), c: g('fe_c'),
-    lat: g('fe_lat'), lng: g('fe_lng'), sp: g('fe_sp')};
-  const m = $('fe_msg'); m.className = 'muted'; m.textContent = 'Saving…';
-  const call = asAdmin ? rpc('adminSaveFarm', me, name, d) : rpc('updateMyFarm', me, d);
-  call.then(() => { m.className = 'ok'; m.textContent = 'Farm profile saved.'; toast('Farm profile saved'); loadAll(() => renderAll()); })
-    .catch(e => { m.className = 'note'; m.textContent = errText(e); });
-}
-
-// ===== CHANGE PASSWORD =====
-function passwordCard() {
-  return `<div class="card"><h3>🔑 Change password</h3>
-    <p class="muted">Enter your current password (or the temporary one from your administrator), then choose a new password.</p>
-    <label>Current password<input id="pwOld" type="password" autocomplete="current-password"></label>
-    <label>New password (at least 8 characters)<input id="pwNew" type="password" autocomplete="new-password"></label>
-    <label>Confirm new password<input id="pwNew2" type="password" autocomplete="new-password"></label>
-    <p class="note" id="pwMsg"></p>
-    <button class="btn" onclick="changeMyPwd()">Save new password</button>
-  </div>`;
-}
-function changeMyPwd() {
-  const o = $('pwOld').value, n = $('pwNew').value, n2 = $('pwNew2').value, m = $('pwMsg');
-  if (!o || !n) { m.className = 'note'; m.textContent = 'Enter your current and new password.'; return; }
-  if (n !== n2) { m.className = 'note'; m.textContent = 'The new passwords do not match.'; return; }
-  if (n.length < 8) { m.className = 'note'; m.textContent = 'Use at least 8 characters.'; return; }
-  if (n === o) { m.className = 'note'; m.textContent = 'Choose a password different from the current one.'; return; }
-  m.className = 'muted'; m.textContent = 'Saving…';
-  rpc('changeMyPassword', me, o, n).then(() => {
-    toast('Password changed');
-    loadAll(() => renderMore());
-  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
-}
-
-// ===== PROFIT ANALYTICS =====
-function analyticsCard() {
-  return `<div class="card"><h3>📈 Profit analytics</h3>
-    <p class="muted" style="margin-top:-6px">Revenue from completed sales, minus the cost per pupa you enter in Manage prices.</p>
-    <button class="ghost" onclick="loadAnalytics()">Load analytics</button>
-    <div id="anaBox" style="margin-top:12px"></div></div>`;
-}
-function loadAnalytics() {
-  rpc('profitAnalytics', me).then(r => {
-    const s = r.summary;
-    const sum = `<div class="stats">
-      <div class="stat"><b>${money(s.revenue)}</b><span>Revenue</span></div>
-      <div class="stat"><b>${money(s.profit)}</b><span>Profit (margin ${s.margin}%)</span></div>
-      <div class="stat"><b>${s.pupaeSold}</b><span>Pupae sold</span></div></div>
-      <p class="muted">Cost: ${money(s.cost)} · Listed now: ${s.pupaeListed} pupae · Completed orders: ${s.orders}</p>`;
-    const rows = r.species.map(x => `<tr><td>${esc(sp(x.species))}</td><td>${x.sold}</td>
-      <td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.profit)}</td><td>${x.margin}%</td><td>${x.listed}</td></tr>`).join('');
-    $('anaBox').innerHTML = sum + (r.species.length
-      ? `<div class="tw"><table><thead><tr><th>Species</th><th>Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Listed</th></tr></thead><tbody>${rows}</tbody></table></div>`
-      : emptyBox('📊', 'No completed sales yet.'));
-  }).catch(e => toast(errText(e)));
-}
-
-// ===== LEGAL =====
-function legalCard() {
-  const link = 'display:block;flex:1;text-align:center;padding:10px;border-radius:12px;text-decoration:none;color:var(--p1);font-weight:600;background:#f2eefc';
-  return `<div class="card"><h3>⚖️ Legal</h3>
-    <p class="muted" style="margin-top:-6px">Terms of use, privacy policy, and copyright notice (version 1.0, November 12, 2026).</p>
-    <div class="row">
-      <a style="${link}" href="${LEGAL_URL}" target="_blank" rel="noopener">Terms &amp; Conditions</a>
-      <a style="${link}" href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">Privacy Policy</a>
-    </div>
-    <p class="muted" style="margin:12px 0 0;text-align:center">© 2026 Jerwin M. Montellano / LepVision. All rights reserved.</p>
-  </div>`;
-}
-
-// ===== MORE =====
-function renderMore() {
-  const u = me ? myUser() : null;
-  let h = '';
-  if (!u || !u.role) {
-    h += `<div class="card"><h3>🔐 Log in</h3><p class="muted">Please log in on the Home page first.</p><button class="btn" onclick="showView('home')">Go to log in</button></div>`;
-  } else {
-    h += `<div class="card"><h3>👤 ${esc(u.name || me)}</h3>
-      <p class="muted" style="margin-top:-6px">${esc(ROLE_NAME[u.role] || u.role)} · @${esc(me)}${u.farm ? '<br>🏡 ' + esc(u.farm) : ''}${u.idType ? '<br>🪪 ' + esc(u.idType) : ''}</p>
-      <h3 style="margin-top:14px">✏️ Edit profile</h3>
-      <label>Full name<input id="pName" value="${esc(u.name || '')}"></label>
-      <label>Phone number<input id="pPhone" type="tel" value="${esc(u.phone || '')}"></label>
-      <label>Email<input id="pEmail" type="email" value="${esc(u.email || '')}"></label>
-      <label>Organization / farm / company<input id="pOrg" value="${esc(u.org || '')}"></label>
-      <label>Address<input id="pAddr" value="${esc(u.address || '')}"></label>
-      ${posts() || isAdmin() ? `<label>GCash number<input id="pGcash" type="tel" value="${esc(u.gcash || '')}"></label>` : ''}
-      <p class="note" id="pMsg"></p>
-      <button class="btn" onclick="saveProfile()">Save profile</button></div>`;
-
-    if (posts() || isAdmin()) h += analyticsCard();
-    if (u.mustChange) h += `<div class="alert red">🔐 Your administrator gave you a temporary password. Please set your own password to continue.</div>`;
-    h += passwordCard();
-
-    if (isBreeder() && myFarm()) h += farmEditorCard(myFarm(), false);
-    else if (isBreeder()) h += `<div class="card"><h3>🏡 My farm</h3><p class="muted">No farm is designated to your account yet. The administrator will assign one.</p></div>`;
-
-    if (isAdmin() && dashboardToken) h += `<div class="card"><h3>📊 Admin dashboard</h3>
-      <p class="muted">All orders, bookings, users and activity. The link expires after one hour; log in again to refresh.</p>
-      <a href="${esc(APPS_SCRIPT_URL)}?page=dashboard&token=${encodeURIComponent(dashboardToken)}" target="_blank" rel="noopener"
-         style="display:block;text-align:center;color:var(--p1);font-weight:700;text-decoration:none">Open admin dashboard</a></div>`;
-
-    if (isAdmin()) {
-      h += `<div class="card"><h3>🏡 Farm bookings (all farms)</h3><div id="ownerBox"></div></div>`;
-      h += `<div class="card"><h3>🛡 User Management</h3>
-        <p class="muted">Add farm owners and edit any user's profile, role, farm or password.</p>
-        <button class="btn" onclick="loadAdminUsers()">Load users</button>
-        <div id="adminBox" style="margin-top:14px"></div></div>`;
-      const names = allFarmNames();
-      if (!adminFarmPick || names.indexOf(adminFarmPick) < 0) adminFarmPick = names[0] || '';
-      h += `<div class="card"><h3>🏡 Farm profiles (admin)</h3>
-        <label>Farm<select onchange="adminFarmPick=this.value;renderMore()">${names.map(f => `<option value="${esc(f)}" ${f === adminFarmPick ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
-        <p class="muted">To designate a farm to a breeder, open User Management, edit the breeder and choose the farm.</p></div>`;
-      if (adminFarmPick) h += farmEditorCard(adminFarmPick, true);
-      h += `<div class="card"><h3>📊 Quality survey results (ISO/IEC 25010)</h3>
-        <button class="ghost" onclick="loadSurveyResults()">Load results</button>
-        <div id="svResults" style="margin-top:12px"></div></div>`;
-    }
-
-    if (canShopManage()) h += `<div class="card"><h3>🛠 Breeder Tools</h3>
-      <p class="muted" style="margin:0 0 10px">Prices, cost per pupa and flood flags are set per species in the Market tab (✏️ Manage prices). Visit prices and seats are set in the farm profile above.</p>
-      <button class="btn" onclick="toggleManage()">${manage ? 'Exit Manage mode' : 'Enter Manage mode'}</button>
-      <div id="parkAdmin" class="${manage ? '' : 'hide'}" style="margin-top:12px"></div></div>`;
-
-    h += salesCard();
-    h += aiCard();
-    h += `<div class="card"><button class="ghost" style="width:100%" onclick="logout()">Log out</button></div>`;
-  }
-  h += legalCard();
-  h += `<div class="card"><h3>📝 Audit trail</h3><p class="muted">Your actions are recorded in the Activity sheet.</p></div>`;
-  $('vMore').innerHTML = h;
-  renderSales();
-  renderOwnerPanel();
-  if (isAdmin() && adminUsers.length) renderAdminUsers();
-  if (canShopManage() && manage) renderParkAdmin();
-}
-function saveProfile() {
-  const m = $('pMsg');
-  const p = {name: $('pName').value.trim(), phone: $('pPhone').value.trim(), email: $('pEmail').value.trim(),
-    organization: $('pOrg').value.trim(), address: $('pAddr').value.trim(), gcash: $('pGcash') ? $('pGcash').value.trim() : undefined};
-  if (!p.name || p.phone.length < 7) { m.className = 'note'; m.textContent = 'Name and a valid phone number are required.'; return; }
-  rpc('updateOwnProfile', me, p).then(() => {
-    m.className = 'ok'; m.textContent = 'Profile saved.';
-    toast('Profile saved');
-    loadAll(() => { renderHeader(); renderMore(); });
-  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
-}
-function toggleManage() { manage = !manage; renderMore(); renderMarket(); }
-function renderParkAdmin() {
-  const box = $('parkAdmin'); if (!box) return;
-  box.innerHTML = `<div class="item">
-    <label>GCash account name<input id="setGName" value="${esc(S.park.gName || '')}" onchange="setPark()"></label>
-    <label>GCash number<input id="setGNo" type="tel" value="${esc(S.park.gNo || '')}" onchange="setPark()"></label>
-    <label>Closed date (all farms)<span class="row"><input type="date" id="closeDate" style="width:auto;flex:1;margin:0"><button class="btn" style="width:auto" onclick="addClosed()">Close</button></span></label>
-    <p class="muted" id="closedList"></p></div>`;
-  renderClosed();
-}
-function setPark() {
-  S.park.gName = $('setGName').value.trim();
-  S.park.gNo = $('setGNo').value.trim();
-  save(); log('Park settings', 'GCash details');
-}
-function addClosed() {
-  const v = $('closeDate').value;
-  if (!v) return;
-  S.park.closed = S.park.closed || [];
-  if (S.park.closed.indexOf(v) > -1) return;
-  S.park.closed.push(v); S.park.closed.sort(); save(); renderClosed(); renderSlots();
-}
-function openDate(v) { S.park.closed = S.park.closed.filter(x => x !== v); save(); renderClosed(); renderSlots(); }
-function renderClosed() {
-  const el = $('closedList'); if (!el) return;
-  el.innerHTML = (S.park.closed || []).length
-    ? 'Closed: ' + S.park.closed.map(d => `${esc(d)} <a href="#" onclick="openDate('${d}');return false">[reopen]</a>`).join(', ')
-    : 'No closed dates.';
-}
-
-// ===== ADMIN: USER MANAGEMENT =====
-function loadAdminUsers() {
-  rpc('adminListUsers', me).then(list => { adminUsers = list; renderAdminUsers(); })
-    .catch(e => toast(errText(e)));
-}
-function renderAdminUsers() {
-  const box = $('adminBox'); if (!box) return;
-  const rows = adminUsers.map((u, i) => `<tr>
-    <td>${esc(u.username)}</td><td>${esc(ROLE_NAME[u.role] || u.role)}</td><td>${esc(u.name)}</td><td>${esc(u.farm || '–')}</td>
-    <td><button class="ghost" style="padding:4px 9px" onclick="editUser(${i})">Edit</button></td></tr>`).join('');
-  const ed = adminUsers.find(u => u.username === editing);
-  box.innerHTML = `<div class="tw"><table><thead><tr><th>Username</th><th>Role</th><th>Name</th><th>Farm</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-    ${ed ? `<div class="item" style="margin-top:12px"><h4 style="margin:0 0 8px">✏️ Edit ${esc(ed.username)}</h4>
-      <label>Role<select id="ea_role">${ROLE_LIST.map(r => `<option value="${r}" ${r === ed.role ? 'selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label>
-      <label>Farm (for farm owners and breeders)<select id="ea_farm">${farmOptions(ed.farm, true)}</select></label>
-      <label>Full name<input id="ea_name" value="${esc(ed.name)}"></label>
-      <label>Phone<input id="ea_phone" value="${esc(ed.phone || '')}"></label>
-      <label>Email<input id="ea_email" value="${esc(ed.email || '')}"></label>
-      <label>Organization<input id="ea_org" value="${esc(ed.organization || '')}"></label>
-      <label>Address<input id="ea_addr" value="${esc(ed.address || '')}"></label>
-      <label>GCash number<input id="ea_gcash" value="${esc(ed.gcash || '')}"></label>
-      <label>New temporary password (leave blank to keep)<input id="ea_pw" type="password" autocomplete="new-password"></label>
-      <div class="row"><button class="btn" style="width:auto" onclick="saveAdminEdit('${esc(ed.username)}')">Save changes</button><button class="ghost" onclick="editing='';renderAdminUsers()">Close</button></div></div>` : ''}
-    <div class="item" style="margin-top:12px"><h4 style="margin:0 0 8px">➕ Add farm owner</h4>
-      <label>Username<input id="cf_user" autocomplete="off"></label>
-      <label>Temporary password<input id="cf_pw" type="password" autocomplete="new-password"></label>
-      <label>Farm they manage<select id="cf_farm">${farmOptions('', false)}</select></label>
-      <label>Full name<input id="cf_name"></label>
-      <label>Phone<input id="cf_phone" type="tel"></label>
-      <label>Email (receives approval requests)<input id="cf_email" type="email"></label>
-      <label>Farm / organization name<input id="cf_org"></label>
-      <label>Address<input id="cf_addr"></label>
-      <p class="note" id="cf_msg"></p>
-      <button class="btn" onclick="createFarmOwner()">Create farm owner</button></div>`;
-}
-function editUser(i) { editing = adminUsers[i].username; renderAdminUsers(); }
-function saveAdminEdit(username) {
-  const d = {
-    username: username, role: $('ea_role').value, farm: $('ea_farm').value,
-    name: $('ea_name').value, phone: $('ea_phone').value, email: $('ea_email').value,
-    organization: $('ea_org').value, address: $('ea_addr').value, gcash: $('ea_gcash').value,
-    password: $('ea_pw').value
-  };
-  rpc('adminUpdateUser', me, d).then(() => { toast('User updated'); editing = ''; loadAdminUsers(); })
-    .catch(e => toast(errText(e)));
-}
-function createFarmOwner() {
-  const m = $('cf_msg');
-  const d = {
-    username: $('cf_user').value.trim().toLowerCase(), password: $('cf_pw').value, farm: $('cf_farm').value,
-    name: $('cf_name').value.trim(), phone: $('cf_phone').value.trim(), email: $('cf_email').value.trim(),
-    organization: $('cf_org').value.trim(), address: $('cf_addr').value.trim()
-  };
-  if (!d.farm) { m.textContent = 'Choose the farm this owner manages.'; return; }
-  m.className = 'muted'; m.textContent = 'Creating account…';
-  rpc('adminCreateFarmOwner', me, d).then(() => {
-    toast('Farm owner created');
-    loadAdminUsers();
-  }).catch(e => { m.className = 'note'; m.textContent = errText(e); });
-}
-
-// ===== AI CLASSIFICATION =====
-function aiCard() {
-  return `<div class="card"><h3>🔬 AI Classification</h3>
-    <p class="muted">Take a photo with the camera or upload one. The model identifies it and the photo is saved to the matching folder in the Butterfly Dataset on Google Drive.</p>
-    <label>What to identify<select id="aiTask">${CLS_TASKS.map(t => `<option value="${t.v}">${esc(t.t)}</option>`).join('')}</select></label>
-    <div class="row" style="margin-bottom:10px">
-      <button class="btn" style="flex:1" onclick="camOpen()">📷 Use camera</button>
-      <label class="ghost" style="flex:1;text-align:center;padding:12px;border-radius:12px;cursor:pointer;color:var(--p1);font-weight:600;margin:0">📁 Upload photo
-        <input type="file" accept="image/*" style="display:none" onchange="classifyPhoto(this)">
-      </label>
-    </div>
-    <div id="camBox" class="hide" style="margin-bottom:10px">
-      <video id="camVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#000"></video>
-      <div class="row" style="margin-top:8px">
-        <button class="btn" style="flex:1" onclick="camCapture()">Capture</button>
-        <button class="ghost" onclick="camClose()">Cancel</button>
-      </div>
-    </div>
-    <label class="muted" style="font-weight:600">Or use the phone's camera app
-      <input type="file" accept="image/*" capture="environment" onchange="classifyPhoto(this)">
-    </label>
-    <p class="note" id="aiMsg"></p>
-    <div id="aiResult"></div>
-    ${isAdmin() ? `<button class="ghost" style="width:100%;margin-top:8px" onclick="showDatasetStatus()">📁 Check dataset counts</button><div id="dsResult" style="margin-top:10px"></div>` : ''}
-  </div>`;
-}
-async function camOpen() {
+/* =====================================================================
+   CAMERA & CLASSIFICATION
+   ===================================================================== */
+function camOpen(){
   camClose();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showAiErr(new Error('This page cannot open the camera. Use "Upload photo" or "Phone camera app" instead.'));
-    return;
+    return setMsg($('clsMsg'), 'This browser cannot open the camera. Use Upload instead.');
   }
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false});
-    const v = $('camVideo');
-    v.srcObject = camStream;
-    await v.play().catch(() => {});
-    $('camBox').classList.remove('hide');
-    $('aiMsg').textContent = '';
-  } catch (e) {
-    showAiErr(new Error('The camera is not available (' + (e.name || e.message) + '). Allow camera access, or use "Upload photo".'));
-  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}, audio:false})
+    .then(s => { camStream = s; const v = $('camV'); v.srcObject = s; v.play().catch(() => {}); $('camBox').classList.remove('hide'); })
+    .catch(e => setMsg($('clsMsg'), 'Camera unavailable (' + (e.name || e.message) + '). Use Upload instead.'));
 }
-function camCapture() {
-  const v = $('camVideo');
-  if (!v || !v.videoWidth) { toast('The camera is still starting. Try again in a moment.'); return; }
-  const c = document.createElement('canvas');
-  c.width = v.videoWidth; c.height = v.videoHeight;
-  c.getContext('2d').drawImage(v, 0, 0);
-  const dataUrl = c.toDataURL('image/jpeg', 0.92);
-  camClose();
-  imageToB64(dataUrl).then(classifyB64).catch(showAiErr);
-}
-function camClose() {
+function camClose(){
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
   const b = $('camBox'); if (b) b.classList.add('hide');
 }
-function classifyPhoto(input) {
-  const f = input.files[0]; if (!f) return;
-  const reader = new FileReader();
-  reader.onload = () => imageToB64(reader.result).then(classifyB64).catch(showAiErr);
-  reader.readAsDataURL(f);
-  input.value = '';
+function camShot(){
+  const v = $('camV');
+  if (!v || !v.videoWidth) return toast('The camera is still starting.');
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  camClose();
+  classify(c.toDataURL('image/jpeg', 0.92));
 }
-function imageToB64(src, maxSide = 1024) {
+function toB64(dataUrl, maxSide = 1024){
   return new Promise((ok, no) => {
     const im = new Image();
     im.onload = () => {
@@ -1565,80 +1307,385 @@ function imageToB64(src, maxSide = 1024) {
       c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
       ok(c.toDataURL('image/jpeg', 0.9).split(',')[1]);
     };
-    im.onerror = () => no(new Error('Could not read the image.'));
-    im.src = src;
+    im.onerror = () => no(new Error('Could not read that image.'));
+    im.src = dataUrl;
   });
 }
-function classifyB64(b64) {
-  const task = $('aiTask').value;
-  const msg = $('aiMsg'), out = $('aiResult');
-  msg.className = 'muted'; msg.textContent = 'Analyzing… this can take up to a minute.'; out.innerHTML = '';
-  return rpc('classifyAndSave', me, {task: task, image: b64, mime: 'image/jpeg'}).then(res => {
-    msg.className = 'ok'; msg.textContent = 'Analysis complete.';
-    out.innerHTML = `<div class="alert ${res.identified ? 'good' : ''}">
-      <b>${res.identified ? esc(res.label) : 'Not identified (saved as Unknown)'}</b>
-      · confidence ${(res.confidence * 100).toFixed(1)}%<br>
-      <a href="${esc(res.fileUrl)}" target="_blank" rel="noopener">View saved photo</a> ·
-      <a href="${esc(res.folderUrl)}" target="_blank" rel="noopener">Open folder</a></div>`;
-  }).catch(showAiErr);
-}
-function showAiErr(e) {
-  const m = $('aiMsg');
-  if (m) { m.className = 'note'; m.textContent = 'Classification failed: ' + errText(e); }
-}
-function showDatasetStatus() {
-  const box = $('dsResult'); if (!box) return;
-  box.innerHTML = '<p class="muted">Loading…</p>';
-  rpc('datasetStatus', me).then(res => {
-    box.innerHTML = Object.keys(res.dataset).map(k => {
-      const t = res.dataset[k], labels = Object.keys(t.labels);
-      return `<div class="item"><b>${esc(t.folder)}</b>${t.found ? '' : ' <span class="chip bad">folder not found</span>'}
-        ${t.jsonFound ? '' : ' <span class="chip warn">' + esc(t.jsonFile) + ' missing</span>'}
-        <div class="muted">${labels.length ? labels.map(l => esc(l) + ': ' + t.labels[l]).join(' · ') : 'No labels yet'}</div></div>`;
-    }).join('');
-  }).catch(e => { box.innerHTML = '<p class="note">' + esc(errText(e)) + '</p>'; });
+function classify(dataUrl){
+  const m = $('clsMsg'), out = $('clsOut');
+  setMsg(m, 'Analyzing… this can take up to a minute.', 'info');
+  out.innerHTML = '';
+  toB64(dataUrl)
+    .then(b64 => api('classifyAndSave', {task:$('clsTask').value, image:b64, mime:'image/jpeg'}))
+    .then(res => {
+      setMsg(m, 'Analysis complete.', 'ok');
+      out.innerHTML = `<div class="alert ${res.identified ? 'ok' : ''}">
+        <b>${res.identified ? esc(res.label) : 'Not identified (saved as Unknown)'}</b> · confidence ${(res.confidence * 100).toFixed(1)}%<br>
+        <a href="${esc(res.fileUrl)}" target="_blank" rel="noopener">View saved photo</a> ·
+        <a href="${esc(res.folderUrl)}" target="_blank" rel="noopener">Open folder</a></div>`;
+    })
+    .catch(e => setMsg(m, errText(e)));
 }
 
-// ===== POPUP (buyers) =====
-function checkPopup() {
-  const u = me && S.users[me];
-  if (!u || !isBuyer() || !$('popup').classList.contains('hide')) return;
-  const fresh = S.lots.filter(l => liveLot(l) && l.created > (u.seen || 0));
-  if (!fresh.length) return;
-  $('popList').innerHTML = fresh.map(l => `<p><b>${esc(sp(l.sp))}</b> – ${l.left} pupae · ₱${Number(l.price).toFixed(2)} each<br><small class="muted">from ${esc((S.users[l.breeder] || {}).name || l.breeder)} · QA passed · ${timeLeft(l)}</small></p>`).join('');
-  $('popup').classList.remove('hide');
-}
-function closePopup(go) {
-  $('popup').classList.add('hide');
-  if (me) rpc('markSeen', me, Date.now()).then(() => { if (S.users[me]) S.users[me].seen = Date.now(); }).catch(() => {});
-  if (go) showView('pupae');
-}
+/* =====================================================================
+   ACTIONS (click delegation) & CHANGES (input delegation)
+   ===================================================================== */
+const ACTIONS = {
+  nav: ds => showView(ds.v),
+  openCart: () => openCart(),
+  closeSheet: () => closeSheet(),
+  logout: () => {
+    api('logout').catch(() => {});
+    clearSession(); showView('home'); toast('Logged out');
+  },
+  authTab: ds => {
+    const reg = ds.m === 'register';
+    $('fLogin').classList.toggle('hide', reg); $('fReg').classList.toggle('hide', !reg);
+    $('tLogin').classList.toggle('on', !reg); $('tReg').classList.toggle('on', reg);
+  },
+  doLogin: () => doLogin(),
+  doRegister: () => doRegister(),
 
-// ===== START =====
-function boot() {
-  $('app').classList.remove('hide');
-  $('nav').classList.remove('hide');
-  let u = null;
+  toggleEdit: () => { UI.edit = !UI.edit; renderMarket(); },
+  addCart: ds => {
+    const i = +ds.i, q = Math.max(1, parseInt(UI.qty[i] || 1, 10)), k = ds.b + '|' + ds.s;
+    UI.cart[k] = (UI.cart[k] || 0) + q;
+    UI.qty[i] = 1;
+    const input = $('q' + i); if (input) input.value = 1;
+    renderCartBadge();
+    toast(`Added ${q} × ${pname(ds.s)} to cart`);
+  },
+  cartRemove: ds => { delete UI.cart[ds.k]; renderCartBadge(); },
+  checkout: () => {
+    const items = Object.keys(UI.cart).map(k => { const [b, s] = k.split('|'); return {breeder:b, sp:s, qty:UI.cart[k]}; });
+    if (!items.length) return toast('Your cart is empty.');
+    api('placeOrder', items)
+      .then(() => { UI.cart = {}; closeSheet(); toast('Order placed! Pay each seller via GCash.'); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+
+  postLot: () => {
+    const m = $('pMsg');
+    const sp = $('pSp').value, qty = parseInt($('pQty').value, 10);
+    const qa = [...document.querySelectorAll('.qa')].map(c => c.checked);
+    if (!mine().gcash) return setMsg(m, 'Add your GCash number in More → Profile first.');
+    if (!(qty >= 1)) return setMsg(m, 'Enter the exact number of pupae.');
+    if (qa.some(x => !x)) return setMsg(m, 'Complete every quality assurance check.');
+    api('postFreshPupae', {sp, qty, notes:$('pNote').value.trim(), qaPassed:true})
+      .then(l => {
+        setMsg(m, `Posted at ${money(l.price)} per pupa. Valid for 2 days.`, 'ok');
+        $('pQty').value = ''; $('pNote').value = '';
+        document.querySelectorAll('.qa').forEach(c => c.checked = false);
+        return refresh();
+      })
+      .then(renderLive)
+      .catch(e => setMsg(m, errText(e)));
+  },
+  lotCount: ds => {
+    const n = prompt('Pupae still available for sale:');
+    if (n === null) return;
+    api('setLotLeft', ds.id, parseInt(n, 10))
+      .then(() => { toast('Count updated'); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+  lotBuy: ds => {
+    const l = S.lots.find(x => x.id === ds.id);
+    const q = parseInt(($('oq' + ds.id) || {}).value, 10);
+    if (!l) return toast('This listing is no longer available.');
+    api('placeOrder', [{breeder:l.breeder, sp:l.sp, qty:q, lotId:l.id}])
+      .then(() => { toast('Order placed! Pay the seller via GCash.'); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+  orderPay: ds => {
+    const v = $('pr_' + ds.id).value;
+    api('updateOrder', ds.id, 'submitPay', {payRef:v})
+      .then(res => { toast(res.message); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+  orderAct: ds => {
+    if (ds.do === 'cancel' && !confirm('Cancel this order?')) return;
+    api('updateOrder', ds.id, ds.do, {})
+      .then(res => { toast(res.message); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+
+  pickSlot: ds => { UI.visit.slot = ds.s; updateSlots(); },
+  reserve: () => {
+    const m = $('vMsg');
+    const d = {
+      farm:UI.visit.farm, date:UI.visit.date, n:parseInt(UI.visit.n, 10), slot:UI.visit.slot,
+      name:$('vName').value.trim(), phone:$('vPhone').value.trim(), email:$('vEmail').value.trim(),
+      purpose:$('vPurpose').value, notes:$('vNotes').value.trim(), terms:$('vTerms').checked
+    };
+    if (!d.slot) return setMsg(m, 'Choose a time slot.');
+    setMsg(m, 'Checking seats…', 'info');
+    api('requestReservation', d)
+      .then(res => {
+        if (res.status === 'Full') { setMsg(m, res.message); toast('That slot is full'); }
+        else {
+          setMsg(m, res.message, 'ok'); toast('Request sent to the farm owner');
+          $('vNotes').value = ''; $('vTerms').checked = false; UI.visit.slot = '';
+        }
+        return refresh();
+      })
+      .then(() => { updateSlots(); renderVisitsLists(); })
+      .catch(e => setMsg(m, errText(e)));
+  },
+  msg: ds => openThread(ds.ref),
+  thSend: () => sendThread(),
+  openPay: ds => {
+    const r = S.reservations.find(x => x.ref === ds.ref); if (!r) return;
+    openSheet('💙 Pay with GCash', `
+      <p>Booking <b>${esc(r.ref)}</b> is approved for <b>${esc(r.farm)}</b>.</p>
+      <p class="muted">${esc(r.date)} · ${esc(r.slot)} · ${r.n} visitor(s)</p>
+      <div class="alert info">Amount due: <b>${money(r.total)}</b><br>
+        Send to: <b>${esc(S.park.gNo || '(ask the farm via messages)')}</b>${S.park.gName ? ' · ' + esc(S.park.gName) : ''}</div>
+      <label class="f">GCash reference number<input id="payRef" inputmode="numeric" placeholder="13-digit reference from your receipt"></label>
+      <p class="note" id="payMsg"></p>
+      <button class="btn block" data-act="submitPay" data-ref="${esc(r.ref)}">I've paid</button>`, 'pay');
+  },
+  submitPay: ds => {
+    api('updateReservation', ds.ref, 'submitPay', {payRef:$('payRef').value})
+      .then(res => { toast(res.message); closeSheet(); return refresh(); })
+      .then(renderLive)
+      .catch(e => setMsg($('payMsg'), errText(e)));
+  },
+  rsv: ds => {
+    const confirms = {
+      approve:'Approve this visit? The visitor will be asked to pay by GCash.',
+      confirm:'Confirm that you received the GCash payment?',
+      cancel:'Cancel this booking?'
+    };
+    let data = {};
+    if (confirms[ds.do] && !confirm(confirms[ds.do])) return;
+    if (ds.do === 'reject') {
+      const note = prompt('Reason for rejection (optional):', '');
+      if (note === null) return;
+      data = {note};
+    }
+    api('updateReservation', ds.ref, ds.do, data)
+      .then(res => { toast(res.message); return refresh(); })
+      .then(renderLive)
+      .catch(e => toast(errText(e)));
+  },
+  bFilter: ds => { UI.bFilter = ds.f; renderBookings(); },
+  addSeat: () => {
+    const f = bFarm(), m = $('stMsg');
+    const from = $('stFrom').value, to = $('stTo').value, seats = $('stSeats').value;
+    if (!from || !to || seats === '') return setMsg(m, 'Enter both dates and the seats per slot.');
+    const rules = [...(S.capRules[f] || []), {from, to, cap:parseInt(seats, 10), label:$('stLabel').value.trim()}];
+    saveRules(f, rules);
+  },
+  rmSeat: ds => {
+    const f = bFarm(), rules = [...(S.capRules[f] || [])];
+    rules.splice(+ds.i, 1);
+    saveRules(f, rules);
+  },
+
+  openSurvey: () => {
+    if (!me) return;
+    if (S.survey.done) return toast('Thank you — you have already answered the survey.');
+    let h = '', last = '';
+    (S.survey.items || []).forEach(it => {
+      if (it.c !== last) { h += `<div class="h4">${esc(it.c)}</div>`; last = it.c; }
+      h += `<div class="li"><div style="margin-bottom:6px">${esc(it.q)}</div><div class="row">
+        ${[1,2,3,4,5].map(n => `<label class="cb" style="margin:0"><input type="radio" name="sv_${it.id}" value="${n}"> ${n}</label>`).join('')}
+      </div></div>`;
+    });
+    openSheet('📝 Quality survey', `<p class="muted">Based on ISO/IEC 25010. Rate each statement from 1 (strongly disagree) to 5 (strongly agree).</p>
+      ${h}
+      <label class="f" style="margin-top:12px">Comments (optional)<textarea id="svC" rows="3"></textarea></label>
+      <p class="note" id="svMsg"></p>
+      <button class="btn block" data-act="submitSurvey">Submit survey</button>`, 'survey');
+  },
+  submitSurvey: () => {
+    const ans = {}; let missing = 0;
+    (S.survey.items || []).forEach(it => {
+      const r = document.querySelector(`input[name="sv_${it.id}"]:checked`);
+      if (r) ans[it.id] = +r.value; else missing++;
+    });
+    if (missing) return setMsg($('svMsg'), `Please answer every statement (${missing} left).`);
+    api('submitSurvey', ans, $('svC').value.trim())
+      .then(() => { toast('Thank you! Survey submitted.'); closeSheet(); return refresh(); })
+      .then(renderLive)
+      .catch(e => setMsg($('svMsg'), errText(e)));
+  },
+  popupView: () => { closeSheet(); showView('pupae'); },
+
+  saveProfile: () => saveProfile(),
+  changePwd: () => {
+    const o = $('pwOld').value, n = $('pwNew').value, n2 = $('pwNew2').value, m = $('pwMsg');
+    if (!o || !n) return setMsg(m, 'Enter your current and new password.');
+    if (n !== n2) return setMsg(m, 'The new passwords do not match.');
+    if (n.length < 8) return setMsg(m, 'Use at least 8 characters.');
+    if (n === o) return setMsg(m, 'Choose a password different from the current one.');
+    api('changeMyPassword', o, n)
+      .then(() => { toast('Password changed'); return refresh(); })
+      .then(renderMore)
+      .catch(e => setMsg(m, errText(e)));
+  },
+  saveFarm: ds => {
+    const g = id => $(id).value;
+    const d = {loc:g('fLoc'), tel:g('fTel'), hours:g('fHours'), p:g('fP'), c:g('fC'),
+               lat:g('fLat'), lng:g('fLng'), sp:g('fSp')};
+    const m = $('fMsg');
+    setMsg(m, 'Saving…', 'info');
+    saveFarmProfile(ds.name, d, ds.admin === '1')
+      .then(() => { setMsg(m, 'Farm profile saved.', 'ok'); return refresh(); })
+      .then(renderLive)
+      .catch(e => setMsg(m, errText(e)));
+  },
+  analytics: () => {
+    api('profitAnalytics').then(r => {
+      const s = r.summary;
+      $('anaBox').innerHTML = `<div class="h4">Profit summary</div>
+        <div class="stats">
+          <div class="stat"><b>${money(s.revenue)}</b><span>Revenue</span></div>
+          <div class="stat"><b>${money(s.profit)}</b><span>Profit (${s.margin}%)</span></div>
+          <div class="stat"><b>${s.pupaeSold}</b><span>Pupae sold</span></div>
+        </div>
+        <p class="muted">Cost ${money(s.cost)} · ${s.pupaeListed} pupae listed now · ${s.orders} completed order(s)</p>
+        ${r.species.length ? `<div class="tbl-wrap"><table><thead><tr><th>Species</th><th>Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr></thead><tbody>
+          ${r.species.map(x => `<tr><td>${esc(pname(x.species))}</td><td>${x.sold}</td><td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.profit)}</td><td>${x.margin}%</td></tr>`).join('')}
+          </tbody></table></div>` : empty('📊', 'No completed sales yet.')}`;
+    }).catch(e => toast(errText(e)));
+  },
+  loadUsers: () => loadUsers(),
+  editUser: ds => {
+    const u = (UI.users || []).find(x => x.username === ds.u); if (!u) return;
+    openSheet('✏️ ' + u.username, `
+      <div class="g2">
+        <label class="f">Role<select id="euRole">${ROLE_LIST.map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label>
+        <label class="f">Farm<select id="euFarm"><option value="">— none —</option>${farmNames().map(f => `<option value="${esc(f)}" ${f === u.farm ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+      </div>
+      <div class="g2">
+        <label class="f">Full name<input id="euName" value="${esc(u.name)}"></label>
+        <label class="f">Phone<input id="euPhone" value="${esc(u.phone)}"></label>
+      </div>
+      <div class="g2">
+        <label class="f">Email<input id="euEmail" value="${esc(u.email)}"></label>
+        <label class="f">Organization<input id="euOrg" value="${esc(u.organization)}"></label>
+      </div>
+      <label class="f">Address<input id="euAddr" value="${esc(u.address)}"></label>
+      <label class="f">GCash number<input id="euGcash" value="${esc(u.gcash)}"></label>
+      <label class="f">New temporary password (leave blank to keep)<input id="euPw" type="password" autocomplete="new-password"></label>
+      <p class="note" id="euMsg"></p>
+      <button class="btn block" data-act="saveUser" data-u="${esc(u.username)}">Save changes</button>`, 'user');
+  },
+  saveUser: ds => {
+    const m = $('euMsg');
+    const d = {
+      username:ds.u, role:$('euRole').value, farm:$('euFarm').value, name:$('euName').value,
+      phone:$('euPhone').value, email:$('euEmail').value, organization:$('euOrg').value,
+      address:$('euAddr').value, gcash:$('euGcash').value, password:$('euPw').value
+    };
+    api('adminUpdateUser', d)
+      .then(() => { toast('User updated'); closeSheet(); loadUsers(); })
+      .catch(e => setMsg(m, errText(e)));
+  },
+  createOwner: () => {
+    const m = $('foMsg');
+    const d = {
+      username:$('foUser').value.trim().toLowerCase(), password:$('foPass').value, farm:$('foFarm').value,
+      name:$('foName').value.trim(), phone:$('foPhone').value.trim(), email:$('foEmail').value.trim()
+    };
+    api('adminCreateFarmOwner', d)
+      .then(() => { setMsg(m, 'Farm owner created. Share the temporary password securely.', 'ok'); toast('Farm owner created'); renderMore(); })
+      .catch(e => setMsg(m, errText(e)));
+  },
+  loadSurvey: () => {
+    api('getSurveyResults').then(r => {
+      $('svRes').innerHTML = `<p class="muted">${r.responses} response(s) · overall average <b>${r.overall == null ? '–' : r.overall}</b> / 5</p>
+        <div class="tbl-wrap"><table><thead><tr><th>Characteristic</th><th>Average</th></tr></thead><tbody>
+        ${r.characteristics.map(c => `<tr><td>${esc(c.name)}</td><td>${c.average == null ? '–' : c.average}</td></tr>`).join('')}
+        </tbody></table></div>
+        ${r.comments.length ? '<div class="h4">Recent comments</div>' + r.comments.map(c => `<div class="li">${esc(c)}</div>`).join('') : ''}`;
+    }).catch(e => toast(errText(e)));
+  },
+  addClosed: () => {
+    const d = $('psDate').value; if (!d) return;
+    S.park.closed = [...new Set([...(S.park.closed || []), d])].sort();
+    savePark();
+  },
+  rmClosed: ds => {
+    S.park.closed = (S.park.closed || []).filter(x => x !== ds.d);
+    savePark();
+  },
+  savePark: () => savePark(),
+  dsStatus: () => {
+    const box = $('dsOut'); box.innerHTML = '<p class="muted">Loading…</p>';
+    api('datasetStatus').then(res => {
+      box.innerHTML = Object.keys(res.dataset).map(k => {
+        const t = res.dataset[k], labels = Object.keys(t.labels);
+        return `<div class="li"><b>${esc(t.folder)}</b>${t.found ? '' : ' <span class="chip bad">folder not found</span>'}
+          <div class="muted">${labels.length ? labels.map(l => esc(l) + ': ' + t.labels[l]).join(' · ') : 'No labels yet'}</div></div>`;
+      }).join('');
+    }).catch(e => { box.innerHTML = `<p class="note">${esc(errText(e))}</p>`; });
+  },
+  camOpen: () => camOpen(),
+  camShot: () => camShot(),
+  camClose: () => camClose()
+};
+
+const CHANGE = {
+  setCat: (ds, el) => { UI.cat = el.value; UI.edit = false; renderMarket(); },
+  qty: (ds, el) => { UI.qty[ds.i] = el.value; },
+  catPrice: (ds, el) => saveCat(ds.sp, {price:parseFloat(el.value)}),
+  catCost: (ds, el) => saveCat(ds.sp, {cost:parseFloat(el.value) || 0}),
+  catFlood: (ds, el) => saveCat(ds.sp, {flooded:el.checked}),
+  catPhoto: (ds, el) => uploadPhoto(ds.sp, ds.kind, el.files[0]),
+  visitFarm: (ds, el) => { UI.visit.farm = el.value; UI.visit.slot = ''; renderVisitInfo(); updateSlots(); },
+  visitDate: (ds, el) => { UI.visit.date = el.value; UI.visit.slot = ''; updateSlots(); },
+  visitN: (ds, el) => { UI.visit.n = el.value; UI.visit.slot = ''; updateSlots(); },
+  bFarm: (ds, el) => { UI.bFarm = el.value; renderBookings(); },
+  aFarm: (ds, el) => { UI.aFarm = el.value; renderMore(); },
+  regRole: () => regRoleChanged(),
+  clsFile: (ds, el) => {
+    const f = el.files[0]; el.value = '';
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => classify(r.result);
+    r.readAsDataURL(f);
+  }
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t) return;
+  if (t.tagName === 'A') e.preventDefault();
+  const fn = ACTIONS[t.dataset.act];
+  if (fn) fn(t.dataset, t);
+});
+document.addEventListener('change', e => {
+  const t = e.target.closest('[data-chg]');
+  if (!t) return;
+  const fn = CHANGE[t.dataset.chg];
+  if (fn) fn(t.dataset, t);
+});
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+function boot(){
   try {
-    u = sessionStorage.getItem('bpUser');
-    dashboardToken = sessionStorage.getItem('bpDashboardToken') || '';
+    SESSION = sessionStorage.getItem('lvToken') || '';
+    me = sessionStorage.getItem('lvUser') || '';
+    dashToken = sessionStorage.getItem('lvDash') || '';
   } catch (e) {}
-  me = u || null;
-  loadAll(() => {
-    initVisits();
-    rpc('getMedia').then(m => { S.media = m || {}; renderMarket(); }).catch(() => {});
-    startPolling();
+  if (!SESSION) { me = ''; dashToken = ''; }
+  rpc('getMedia').then(m => { MEDIA = m || {}; }).catch(() => {});
+  refresh().then(() => {
+    renderNav();
     showView('home');
-    if (me) checkPopup();
+    if (me) startPolling();
   });
 }
-
 boot();
-
-// Offline app shell (GitHub Pages only)
-if ('serviceWorker' in navigator && location.protocol === 'https:' && !IN_APPS_SCRIPT) {
-  navigator.serviceWorker.register('sw.js');
-}
 </script>
 </body>
 </html>
