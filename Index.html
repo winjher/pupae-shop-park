@@ -175,7 +175,7 @@ label.cb{display:flex;gap:9px;align-items:flex-start;font-weight:600;color:var(-
    CONFIG
    ===================================================================== */
 const IN_APPS_SCRIPT = !!(window.google && window.google.script && window.google.script.run);
-const SERVER_FALLBACK_URL = 'https://script.google.com/macros/s/AKfycbzX7PPf85oIci5FhrWlDPdV3Ka_4y9bs2kNjKMZLKgrFUDsNEgxvjLQCbC66gc7a_CsWA/exec';
+const SERVER_FALLBACK_URL = 'https://script.google.com/macros/s/AKfycbyR3YOwNEhZmnoG94E27j3lJgqZ-KB7zBACPazkb-TGE2mFwq4OWFlmphGY1coU0G0aAw/exec';
 const APPS_SCRIPT_URL = (function () {
   const tpl = '<?= ScriptApp.getService().getUrl() ?>';
   if (tpl && tpl.indexOf('https://') === 0) return tpl;
